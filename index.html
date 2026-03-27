@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta id="cor-navegador" name="theme-color" content="#E40303">
+    <meta name="color-scheme" content="light dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="icon" type="image/png" href="https://i.ibb.co/VWSYRZ0j/IMG-1836.png?v=3">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/VWSYRZ0j/IMG-1836.png?v=3">
+    <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/VWSYRZ0j/IMG-1836.png?v=3">
+    <link rel="shortcut icon" href="https://i.ibb.co/VWSYRZ0j/IMG-1836.png?v=3">
+    <meta name="apple-mobile-web-app-title" content="Queerflix+">
+    <meta name="application-name" content="Queerflix+">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Queerflix+","short_name":"Queerflix+","start_url":".","display":"standalone","background_color":"#050505","theme_color":"#E40303","icons":[{"src":"https://i.ibb.co/VWSYRZ0j/IMG-1836.png","sizes":"512x512","type":"image/png"}]}'>
+    <title>Queerflix+</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dynamic-text: #ffffff;
+            --dynamic-text-muted: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-active: rgba(255, 255, 255, 0.15);
+        }
+
+        .txt-dyn { color: var(--dynamic-text); transition: color 0.3s ease; }
+        .txt-dyn-muted { color: var(--dynamic-text-muted); transition: color 0.3s ease; }
+        .border-dyn { border-color: var(--glass-border); transition: border-color 0.3s ease; }
+        .bg-dyn { background-color: var(--glass-bg); transition: background-color 0.3s ease; }
+
+        html, body {
+            margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; font-family: 'Outfit', sans-serif;
+            background-color: #050505; color: var(--dynamic-text);
+        }
+
+        .rainbow-animated { animation: rainbow-cycle 360s linear infinite; }
+        @keyframes rainbow-cycle { 0%, 15% { background-color: #E40303; } 25%, 40% { background-color: #008026; } 50%, 65% { background-color: #24408E; } 75%, 90% { background-color: #732982; } 100% { background-color: #E40303; } }
+
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; filter: blur(90px); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: morph 15s ease-in-out infinite alternate; mix-blend-mode: overlay; }
+        .blob-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: rgba(255, 255, 255, 0.4); }
+        .blob-2 { bottom: -20%; right: -10%; width: 70vw; height: 70vw; background: rgba(0, 0, 0, 0.5); animation-delay: -5s; }
+        .blob-3 { top: 40%; left: 30%; width: 50vw; height: 50vw; background: rgba(255, 255, 255, 0.25); animation-delay: -10s; }
+        @keyframes morph { 0% { transform: translate(0, 0) scale(1) rotate(0deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; } 100% { transform: translate(15vw, 10vh) scale(1.3) rotate(45deg); border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; } }
+
+        .liquid-glass { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15), inset 0 1px 0 0 var(--glass-bg); transition: all 0.3s ease; }
+        .liquid-glass-active { background: var(--glass-active); box-shadow: inset 0 0 20px var(--glass-bg), 0 8px 32px 0 rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); transform: translateY(-2px); }
+
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 0.6rem; position: relative; cursor: pointer; transition: transform 0.2s; }
+        .brand-container:active { transform: scale(0.95); }
+        .brand-mark { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+        .brand-mark-blob { position: absolute; inset: 0; background: var(--glass-border); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1.5px solid var(--dynamic-text); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; animation: logo-morph 4s ease-in-out infinite alternate; transition: all 0.3s; }
+        .brand-mark-play { width: 16px; height: 16px; background: var(--dynamic-text); clip-path: polygon(15% 0, 100% 50%, 15% 100%); position: relative; z-index: 2; margin-left: 3px; transition: background 0.3s; }
+        @keyframes logo-morph { 0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: rotate(0deg); } 100% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 50%; transform: rotate(15deg); } }
+        .logo-text { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 0.5px; position: relative; text-transform: uppercase; color: var(--dynamic-text); text-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: color 0.3s; }
+        .logo-text::before { content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; height: 50%; background: linear-gradient(180deg, var(--dynamic-text) 0%, transparent 100%); -webkit-background-clip: text; background-clip: text; color: transparent; pointer-events: none; z-index: 2; opacity: 0.8; transition: background 0.3s; }
+
+        .sparkle { position: absolute; fill: #FFFF00; filter: drop-shadow(0 0 6px #FFA500); animation: sparkle-twinkle 2.5s ease-in-out infinite alternate; z-index: 3; pointer-events: none;}
+        .sparkle-1 { width: 18px; height: 18px; top: -10px; right: -15px; } .sparkle-4 { width: 10px; height: 10px; top: 12px; right: -30px; animation-delay: -0.7s; animation-duration: 2s; } .sparkle-5 { width: 14px; height: 14px; bottom: -2px; right: -20px; animation-delay: -1.8s; animation-direction: alternate-reverse; } .sparkle-2 { width: 12px; height: 12px; bottom: 2px; left: -10px; animation-delay: -1s; animation-direction: alternate-reverse; } .sparkle-3 { width: 14px; height: 14px; top: 0px; left: -18px; animation-delay: -1.5s; }
+        @keyframes sparkle-twinkle { 0% { transform: scale(0.6) rotate(0deg); opacity: 0.6; } 100% { transform: scale(1.2) rotate(45deg); opacity: 1; } }
+
+        .infinite-scroll-area { min-height: 100vh; width: 100%; padding-bottom: calc(6rem + env(safe-area-inset-bottom)); overflow-y: auto; }
+        .tab-enter { animation: fadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-icon { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); stroke: var(--dynamic-text-muted); }
+        .liquid-glass-active .nav-icon { stroke: var(--dynamic-text); }
+
+        .glass-input { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 1.1rem 1.2rem; border-radius: 1rem; color: var(--dynamic-text); outline: none; transition: all 0.3s ease; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 1rem; }
+        .glass-input::placeholder { color: var(--dynamic-text-muted); font-weight: 400; }
+        .glass-input:focus { border-color: var(--dynamic-text); background: var(--glass-active); box-shadow: 0 0 15px var(--glass-bg); }
+        .glass-btn { width: 100%; padding: 1.1rem; border-radius: 1rem; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s ease; cursor: pointer; color: var(--dynamic-text); }
+        
+        .profile-bubble-container { display: flex; justify-content: center; align-items: center; width: 100%; }
+        .profile-bubble { width: 12rem; height: 12rem; border-radius: 50%; padding: 0.35rem; border: 2px solid var(--glass-border); background: var(--glass-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: all 0.3s; }
+        
+        .img-preview-container { width: 110px; height: 110px; border-radius: 50%; background: var(--glass-bg); border: 2px dashed var(--glass-border); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; transition: all 0.3s ease; margin: 0 auto; }
+        .preview-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+        .preview-icon { position: absolute; color: var(--dynamic-text-muted); z-index: 1; pointer-events: none;}
+        .loading-star { width: 22px; height: 22px; fill: #FFFF00; filter: drop-shadow(0 0 4px #FFA500); display: none; }
+        .btn-loading .btn-text, .btn-loading i { display: none; } .btn-loading .loading-star { display: block; animation: spin-star 1s linear infinite; }
+
+        #toast-container { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; width: 90%; max-w: 400px; pointer-events: none; }
+        .toast { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 1.2rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); animation: slideDownToast 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .toast.success { border-left: 4px solid #008026; } .toast.error { border-left: 4px solid #E40303; }
+        .toast.fade-out { animation: fadeOutToast 0.4s ease forwards; }
+        @keyframes slideDownToast { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutToast { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+
+        .auth-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 13rem); padding-top: 1rem; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto;}
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+        .skeleton { background: var(--glass-border); animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: 1rem; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .admin-page { position: fixed; inset: 0; z-index: 100; background-color: #070707; color: white; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(100%); pointer-events: none; }
+        .admin-page.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .admin-content-area { flex: 1; overflow-y: auto; padding-bottom: 4rem; }
+        .toggle-badge { padding: 0.4rem 1rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); transition: all 0.2s; }
+        .toggle-badge.active-redirect { background: rgba(36, 64, 142, 0.3); border-color: #24408E; color: white; }
+        .toggle-badge.active-sub { background: rgba(0, 128, 38, 0.3); border-color: #008026; color: white; }
+        
+        ::-webkit-scrollbar { display: none; } * { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .color-picker-btn { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); transition: transform 0.2s; cursor: pointer; }
+        .color-picker-btn.active { border-color: var(--dynamic-text); transform: scale(1.15); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: var(--dynamic-text); cursor: pointer; margin-top: -8px; box-shadow: 0 0 5px rgba(0,0,0,0.3); transition: background 0.3s; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--glass-border); border-radius: 2px; transition: background 0.3s; }
+
+        .hero-banner-container { width: 100%; aspect-ratio: 16/9; max-height: 45vh; border-bottom-left-radius: 2rem; border-bottom-right-radius: 2rem; position: relative; overflow: hidden; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; pointer-events: none; }
+        .hero-slide.active { opacity: 1; pointer-events: all; }
+        .hero-gradient { background: linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.2) 60%, rgba(5,5,5,0) 100%); }
+
+        .details-page { position: fixed; inset: 0; z-index: 120; display: flex; flex-direction: column; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(100%); pointer-events: none; background-color: #000; }
+        .details-page.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+        .details-bg-anim { filter: blur(40px) saturate(200%); animation: pulseBg 10s ease-in-out infinite alternate; will-change: transform, opacity; }
+        @keyframes pulseBg { 0% { transform: scale(1.1); opacity: 0.6; } 100% { transform: scale(1.3); opacity: 0.9; } }
+        .clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .full-grid-page { position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(100%); pointer-events: none; background: rgba(5, 5, 5, 0.6); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+        .full-grid-page.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+        /* Estilos do Player em Tela Cheia */
+        .player-page { position: fixed; inset: 0; z-index: 300; background-color: var(--theme-color-bg, #050505); background-image: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(0,0,0,0.98)); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); display: flex; flex-direction: column; transition: all 0.4s ease; opacity: 0; transform: translateY(100%); pointer-events: none; }
+        .player-page.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+        video::-webkit-media-controls-panel { background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.8)) !important; }
+    /* Ajustes UI & Top 10 Netflix Style */
+        .top10-number { font-size: 8rem; font-weight: 900; -webkit-text-stroke: 3px rgba(255,255,255,0.3); color: transparent; line-height: 0.8; letter-spacing: -5px; user-select: none; text-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+</style>
+</head>
+<body class="antialiased selection:bg-white/30">
+
+    <div id="toast-container"></div>
+
+    <div id="player-view" class="player-page">
+        <div style="padding-top: max(1rem, env(safe-area-inset-top));" class="w-full flex items-center justify-between px-4 pb-4 absolute top-0 z-[9999] pointer-events-auto bg-black/80 backdrop-blur-md border-b border-white/10 shadow-lg">
+            <button onclick="closeOverlay()" class="p-2 bg-white/10 rounded-full text-white hover:bg-white/30 transition backdrop-blur-md border border-white/20 shadow-lg cursor-pointer"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 id="player-title" class="text-white font-bold text-lg drop-shadow-lg truncate px-4 flex-1 text-center font-outfit">Título</h2>
+            <div class="w-10"></div>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-start w-full max-w-5xl mx-auto pt-[6rem] px-4 pb-6 z-50">
+            <div id="player-media-container" class="w-full aspect-video rounded-[1rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-black relative border border-white/10 flex items-center justify-center mt-4">
+                <video id="main-video-player" controls playsinline webkit-playsinline class="w-full h-full outline-none object-contain hidden"></video>
+                <iframe id="main-iframe-player" class="w-full h-full outline-none hidden" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            </div>
+            
+            <div id="player-tv-controls" class="w-full mt-6 hidden flex-col items-start gap-2">
+                <label class="text-white/60 text-sm font-bold pl-2 uppercase tracking-widest">Navegação de Episódios</label>
+                <div class="relative w-full max-w-sm">
+                    <select id="player-ep-select" onchange="changePlayerEpisode(this.value)" class="w-full bg-white/10 border border-white/20 text-white font-bold py-3 px-4 pr-10 rounded-xl outline-none appearance-none backdrop-blur-md shadow-lg">
+                        </select>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="server-modal" class="modal-overlay px-4 z-[250]">
+        <div class="bg-[#111] border border-white/20 modal-content w-full max-w-sm rounded-[2rem] p-6 flex flex-col shadow-2xl">
+            <h3 class="text-xl font-black mb-4 text-white drop-shadow-md">Escolha um Servidor</h3>
+            <div id="server-list" class="flex flex-col gap-3 max-h-60 overflow-y-auto no-scrollbar">
+                </div>
+            <button onclick="closeOverlay()" class="mt-5 py-3 rounded-xl w-full bg-white/5 text-white/80 font-bold hover:bg-white/10 transition-colors border border-white/10">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="admin-view" class="admin-page">
+        <div style="padding-top: max(1rem, env(safe-area-inset-top));" class="w-full bg-[#111] border-b border-white/10 flex items-center justify-between px-4 pb-4 shadow-md z-10 shrink-0 relative">
+            <button onclick="closeOverlay()" class="relative z-50 p-3 -ml-2 text-white/70 hover:text-white active:scale-95 transition-transform rounded-full flex items-center justify-center"><i data-lucide="x" class="w-7 h-7"></i></button>
+            <h2 class="text-xl font-black text-white tracking-widest drop-shadow-md uppercase absolute left-1/2 -translate-x-1/2">Painel ADM</h2>
+            <div class="w-10"></div> 
+        </div>
+
+        <div class="admin-content-area px-4 pt-6 pb-20 w-full max-w-2xl mx-auto relative">
+            <div id="admin-menu" class="flex flex-col gap-6">
+                <p class="text-center text-white/60 text-sm font-medium">Gerencie o catálogo.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="openPublishForm()" class="bg-[#111] border border-white/10 p-6 rounded-[2rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-xl group">
+                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors shadow-inner"><i data-lucide="upload-cloud" class="w-8 h-8 text-white drop-shadow-md"></i></div>
+                        <span class="font-black text-white text-lg tracking-wide">Publicar</span>
+                    </button>
+                    <button onclick="openEditList()" class="bg-[#111] border border-white/10 p-6 rounded-[2rem] flex flex-col items-center gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-xl group">
+                        <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors shadow-inner"><i data-lucide="edit-3" class="w-8 h-8 text-white drop-shadow-md"></i></div>
+                        <span class="font-black text-white text-lg tracking-wide">Editar</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="admin-edit-list" class="hidden flex-col gap-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-2xl font-black text-white">Editar Conteúdo</h3>
+                    <button onclick="closeEditList()" class="text-sm font-bold text-white/70 hover:text-white bg-white/10 px-3 py-1.5 rounded-full">Voltar</button>
+                </div>
+                <div class="relative w-full">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"></i>
+                    <input type="text" id="admin-local-search" placeholder="Pesquisar publicados ou rascunhos..." class="w-full bg-[#1a1a1a] border border-white/20 text-white pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-white transition-all font-medium" oninput="renderEditList(this.value)">
+                </div>
+                <div id="edit-content-container" class="flex flex-col gap-4"></div>
+            </div>
+
+            <div id="admin-publish" class="hidden flex-col gap-6 mt-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 id="publish-form-title" class="text-2xl font-black text-white">Nova Publicação</h3>
+                    <button onclick="closePublishForm()" class="text-sm font-bold text-[#E40303] bg-red-500/10 px-3 py-1.5 rounded-full">Cancelar</button>
+                </div>
+                <div id="tmdb-search-box" class="relative w-full z-20">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50"></i>
+                    <input type="text" id="tmdb-search" placeholder="Buscar Filme/Série no TMDB..." class="w-full bg-[#1a1a1a] border border-white/20 text-white pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-white focus:bg-[#222] transition-all font-medium" oninput="handleTMDBSearch(this.value)">
+                    <ul id="tmdb-results" class="absolute top-full left-0 w-full bg-[#111] border border-white/10 rounded-2xl mt-2 max-h-64 overflow-y-auto hidden shadow-2xl flex-col gap-1 p-2"></ul>
+                </div>
+                <div id="publish-form-data" class="hidden flex-col gap-5 bg-[#111] p-5 rounded-[2rem] border border-white/10">
+                    <div class="flex gap-4 items-center">
+                        <img id="pub-poster" src="" class="w-24 h-36 rounded-xl object-cover border border-white/20 shadow-md">
+                        <div class="flex flex-col">
+                            <span id="pub-type-badge" class="text-[0.7rem] font-black uppercase tracking-widest bg-white/10 px-2 py-1 rounded w-max mb-1">Filme</span>
+                            <h4 id="pub-title" class="text-xl font-black leading-tight">Título</h4>
+                            <p id="pub-date" class="text-sm text-white/60 mt-1">Data</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="pub-tmdb-id"> <input type="hidden" id="pub-media-type"> <input type="hidden" id="pub-poster-url"> <input type="hidden" id="pub-original-title">
+                    <div class="flex flex-col gap-3">
+                        <label class="text-xs font-bold text-white/50 uppercase tracking-wider pl-1">Sinopse</label>
+                        <textarea id="pub-synopsis" rows="3" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-sm text-white/90 outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1"><label class="text-xs font-bold text-white/50 uppercase tracking-wider pl-1">Gêneros</label><input type="text" id="pub-genres" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-sm text-white/90 outline-none"></div>
+                        <div class="flex flex-col gap-1"><label class="text-xs font-bold text-white/50 uppercase tracking-wider pl-1">Atores</label><input type="text" id="pub-actors" class="w-full bg-[#1a1a1a] border border-white/10 rounded-xl p-3 text-sm text-white/90 outline-none"></div>
+                    </div>
+                </div>
+                <div id="publish-media-section" class="hidden flex-col gap-4">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-2"><h4 class="text-lg font-black uppercase tracking-widest">Links de Mídia</h4></div>
+                    <div id="media-content-container" class="flex flex-col gap-4"></div>
+                </div>
+                <button id="btn-review-publish" onclick="openPublishPreview()" class="hidden w-full bg-white text-black font-black text-lg py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] uppercase tracking-widest">Revisar & Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal-overlay px-4 z-[200]">
+        <div class="bg-[#111] border border-white/20 modal-content w-full max-w-sm rounded-[2rem] p-6 flex flex-col shadow-2xl">
+            <h3 class="text-2xl font-black mb-4 text-white">Confirmar Salvar</h3>
+            <div id="preview-content" class="text-sm text-white/80 bg-[#1a1a1a] p-4 rounded-xl overflow-y-auto max-h-48 mb-6 font-mono whitespace-pre-wrap"></div>
+            <div class="flex gap-3 w-full">
+                <button onclick="closePublishPreview()" class="py-3 rounded-xl flex-1 bg-white/5 text-white font-bold hover:bg-white/10">Voltar</button>
+                <button id="btn-confirm-save-db" onclick="confirmPublish()" class="py-3 rounded-xl flex-1 bg-[#008026] text-white font-black flex justify-center items-center gap-2"><span class="btn-text">Salvar</span><svg class="loading-star w-5 h-5 hidden" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></button>
+            </div>
+        </div>
+    </div>
+    <div id="delete-confirm-modal" class="modal-overlay px-4 z-[200]">
+        <div class="bg-[#111] border border-red-500/30 modal-content w-full max-w-sm rounded-[2rem] p-6 flex flex-col items-center text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4"><i data-lucide="trash-2" class="w-8 h-8 text-red-500"></i></div>
+            <h3 class="text-2xl font-black mb-2 text-white">Apagar Definitivamente?</h3>
+            <p class="text-white/60 mb-6 text-sm">Esta ação não pode ser desfeita.</p>
+            <div class="flex gap-3 w-full">
+                <button onclick="closeDeleteModal()" class="py-3 rounded-xl flex-1 bg-white/5 text-white font-bold hover:bg-white/10">Cancelar</button>
+                <button id="btn-delete-final" onclick="executeDelete()" class="py-3 rounded-xl flex-1 bg-red-600 text-white font-black shadow-lg shadow-red-600/30">Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="full-grid-view" class="full-grid-page">
+        <div style="padding-top: max(1rem, env(safe-area-inset-top));" class="w-full border-b border-white/10 flex items-center justify-between px-4 pb-4 shadow-md z-10 shrink-0">
+            <button onclick="closeOverlay()" class="p-2 text-white/90 hover:text-white active:scale-95 transition-transform bg-white/10 rounded-full"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <h2 id="full-grid-title" class="text-lg font-black text-white tracking-widest drop-shadow-lg uppercase text-center flex-1 mx-2 line-clamp-1">Grade</h2>
+            <div class="w-10"></div> 
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 pb-12">
+            <div id="full-grid-container" class="grid grid-cols-4 gap-2">
+                </div>
+        </div>
+    </div>
+
+    <div id="details-view" class="details-page">
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <img id="details-bg-poster" src="" class="w-full h-full object-cover details-bg-anim">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-2xl"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        </div>
+
+        <div style="padding-top: max(1rem, env(safe-area-inset-top));" class="relative z-10 w-full flex items-center justify-between px-6 pb-2">
+            <button onclick="closeOverlay()" class="p-2 text-white/90 hover:text-white active:scale-95 transition-transform bg-white/10 rounded-full backdrop-blur-md border border-white/20 shadow-lg"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+            <div class="flex gap-3">
+                <button onclick="shareContent()" class="p-2 text-white/90 hover:text-white active:scale-95 transition-transform bg-white/10 rounded-full backdrop-blur-md border border-white/20 shadow-lg"><i data-lucide="share-2" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+
+        <div id="details-loading" class="relative z-10 flex-1 flex items-center justify-center">
+            <svg class="w-12 h-12 animate-spin fill-[#ffffff] drop-shadow-md" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+        </div>
+
+        <div id="details-content-scroll" class="relative z-10 flex-1 overflow-y-auto hidden flex-col w-full max-w-2xl mx-auto pb-32">
+            
+            <div class="flex flex-col items-center px-6 mt-4">
+                <img id="det-poster" src="" class="w-44 h-[16.5rem] rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.6)] object-cover border border-white/20 mb-6">
+                
+                <div id="det-badges" class="flex flex-wrap justify-center gap-2 mb-4">
+                    <span id="det-year" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-white/90 backdrop-blur-md"></span>
+                    <span id="det-age" class="px-3 py-1 rounded-full text-xs font-bold text-white/90 shadow-md border border-white/20">L</span>
+                    <span id="det-genre" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-white/90 backdrop-blur-md"></span>
+                </div>
+
+                <h1 id="det-title" class="text-3xl font-black text-white text-center tracking-wide drop-shadow-xl mb-6"></h1>
+                
+                <div class="flex items-center justify-center gap-4 w-full mb-6">
+                    <button id="det-btn-watch" onclick="openServerModal('movie')" class="hidden flex-1 max-w-[200px] bg-white text-black font-black text-lg py-3 rounded-full hover:scale-[1.02] active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2">
+                        <i data-lucide="play" class="w-6 h-6 fill-black"></i> Assistir
+                    </button>
+                    <button id="det-btn-save" onclick="toggleMyList()" class="flex-1 max-w-[200px] bg-white/10 border border-white/20 text-white font-bold text-sm py-3.5 rounded-full hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center gap-2 backdrop-blur-md">
+                        <i id="save-icon" data-lucide="plus" class="w-5 h-5 transition-all"></i> <span id="save-text">Minha Lista</span>
+                    </button>
+                </div>
+
+                <div class="w-full text-center">
+                    <p id="det-synopsis" class="text-[0.95rem] text-white/90 leading-relaxed clamp-4 transition-all drop-shadow-md font-medium"></p>
+                    <button id="det-btn-synopsis" onclick="toggleSynopsis()" class="text-sm font-black text-white mt-2 hover:underline drop-shadow-md">Ver mais</button>
+                </div>
+            </div>
+
+            <div class="mt-8 px-6">
+                <h3 class="text-lg font-black text-white mb-4 drop-shadow-md">Elenco Principal</h3>
+                <div id="det-cast" class="flex gap-4 overflow-x-auto no-scrollbar pb-2"></div>
+            </div>
+
+            <div id="det-tv-section" class="hidden flex-col w-full mt-8">
+                <div class="px-6 mb-4">
+                    <div class="relative w-max">
+                        <select id="det-season-select" onchange="renderEpisodes(this.value)" class="appearance-none bg-black/40 border border-white/20 text-white font-bold text-lg px-6 py-2 pr-10 rounded-xl outline-none shadow-xl backdrop-blur-md">
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div id="det-episodes-list" class="flex flex-col gap-4 px-6"></div>
+            </div>
+
+            <div id="det-recommendations" class="hidden flex-col mt-10">
+                <div class="flex items-center justify-between px-6 mb-4">
+                    <div class="w-6"></div> <h3 class="text-lg font-black text-white drop-shadow-md text-center flex-1">Títulos Similares</h3>
+                    <button onclick="openFullGrid('Títulos Similares', window.currentSimilarItems)" class="p-1 active:scale-95 transition-transform"><i data-lucide="chevron-right" class="w-6 h-6 text-white drop-shadow-md"></i></button>
+                </div>
+                <div id="det-recs-carousel" class="flex gap-4 overflow-x-auto px-6 pb-6 snap-x snap-mandatory no-scrollbar"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="settings-modal" class="modal-overlay px-4 z-[90]">
+        <div class="liquid-glass modal-content w-full max-w-sm rounded-[2rem] p-6 flex flex-col items-center shadow-2xl relative">
+            <h3 class="text-2xl font-black mb-4 txt-dyn">Aparência do Site</h3>
+            <div class="w-full flex gap-2 mb-6 bg-dyn p-1 rounded-xl border border-dyn">
+                <button onclick="changeMode('animado')" id="btn-mode-animado" class="flex-1 py-2 rounded-lg font-bold txt-dyn transition-all bg-[var(--glass-active)] shadow-sm">Animado</button>
+                <button onclick="changeMode('estatico')" id="btn-mode-estatico" class="flex-1 py-2 rounded-lg font-bold txt-dyn-muted transition-all hover:txt-dyn">Cor Fixa</button>
+            </div>
+            <div id="panel-cores" class="w-full flex-col items-center hidden transition-all">
+                <p class="text-sm txt-dyn-muted mb-3 font-semibold">Escolha uma cor:</p>
+                <div class="flex flex-wrap gap-3 justify-center mb-6 w-full">
+                    <button onclick="selectColor('#E40303', this)" class="color-picker-btn" style="background-color: #E40303;"></button>
+                    <button onclick="selectColor('#008026', this)" class="color-picker-btn" style="background-color: #008026;"></button>
+                    <button onclick="selectColor('#24408E', this)" class="color-picker-btn" style="background-color: #24408E;"></button>
+                    <button onclick="selectColor('#732982', this)" class="color-picker-btn" style="background-color: #732982;"></button>
+                    <button onclick="selectColor('#FFFFFF', this)" class="color-picker-btn" style="background-color: #FFFFFF;"></button>
+                    <button onclick="selectColor('#000000', this)" class="color-picker-btn" style="background-color: #000000;"></button>
+                </div>
+                <div class="w-full flex flex-col gap-2 mb-6">
+                    <div class="flex justify-between w-full text-sm font-semibold txt-dyn-muted"><span>Suave</span><span>Forte</span></div>
+                    <input type="range" id="intensity-slider" min="0.3" max="1" step="0.05" value="1" oninput="changeIntensity(this.value)">
+                </div>
+            </div>
+            <div class="flex gap-4 w-full mt-2">
+                <button onclick="cancelSettings()" class="glass-btn flex-1 txt-dyn-muted hover:txt-dyn border border-dyn">Cancelar</button>
+                <button onclick="saveSettings()" class="glass-btn flex-1 liquid-glass-active font-bold">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="legal-modal" class="modal-overlay px-4 z-[300]">
+        <div class="liquid-glass modal-content w-full max-w-sm rounded-[2rem] p-8 flex flex-col items-center text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-500/30"><i data-lucide="info" class="w-8 h-8 text-blue-500 drop-shadow-md"></i></div>
+            <h3 class="text-2xl font-black mb-4 txt-dyn drop-shadow-md">Aviso Legal</h3>
+            <p class="txt-dyn-muted mb-4 text-[0.85rem] leading-relaxed">
+                O <strong>Queerflix</strong> não hospeda filmes ou séries em seus servidores. A plataforma apenas indexa conteúdos disponíveis publicamente na internet.
+            </p>
+            <p class="txt-dyn-muted mb-8 text-[0.85rem] leading-relaxed">
+                Todo o conteúdo é fornecido por serviços e players externos. O uso da plataforma é de responsabilidade exclusiva do usuário.<br><br>
+                Caso exista alguma violação de direitos autorais, a solicitação deve ser direcionada ao site ou distribuidor responsável pelo conteúdo exibido.
+            </p>
+            <button onclick="closeOverlay()" class="glass-btn w-full bg-dyn border border-dyn txt-dyn hover:scale-[1.02] transition-transform">Entendi</button>
+        </div>
+    </div>
+<div id="edit-profile-modal" class="modal-overlay px-4 z-[90]">
+        <div class="liquid-glass modal-content w-full max-w-sm rounded-[2rem] p-6 flex flex-col items-center shadow-2xl relative">
+            <h3 class="text-2xl font-black mb-4 txt-dyn">Editar Perfil</h3>
+            <div class="flex flex-col items-center mb-4">
+                <label for="edit-photo" class="img-preview-container shadow-lg" id="edit-photo-container" style="border-style: solid;">
+                    <img id="edit-photo-preview" class="preview-image" src="" alt="Preview" style="display: block;">
+                    <div id="edit-photo-spinner" class="absolute inset-0 bg-black/50 hidden items-center justify-center z-10 rounded-full"><svg class="w-8 h-8 animate-spin fill-[#FFFF00]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></div>
+                </label>
+                <input type="file" id="edit-photo" accept="image/*" class="hidden" onchange="handleEditPhotoSelect(event)">
+                <p class="text-xs txt-dyn-muted mt-2 font-bold uppercase tracking-widest cursor-pointer hover:underline" onclick="document.getElementById('edit-photo').click()">Trocar Foto</p>
+            </div>
+            <input type="text" id="edit-name" placeholder="Seu Nome" class="glass-input shadow-lg mb-6 text-center font-bold">
+            <div class="flex gap-4 w-full">
+                <button onclick="closeEditProfileModal()" class="glass-btn flex-1 txt-dyn-muted hover:txt-dyn border border-dyn">Cancelar</button>
+                <button id="btn-save-profile" onclick="saveEditProfile()" class="glass-btn flex-1 liquid-glass-active font-bold"><span class="btn-text">Salvar</span><svg class="loading-star hidden" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></button>
+            </div>
+        </div>
+    </div>
+<div id="logout-modal" class="modal-overlay px-4 z-[90]">
+        <div class="liquid-glass modal-content w-full max-w-sm rounded-[2rem] p-8 flex flex-col items-center text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4 border border-red-500/30"><i data-lucide="log-out" class="w-8 h-8 text-red-500 drop-shadow-md"></i></div>
+            <h3 class="text-2xl font-black mb-2 txt-dyn drop-shadow-md">Sair da Conta</h3>
+            <p class="txt-dyn-muted mb-8 text-[0.95rem]">Tem certeza que deseja sair do Queerflix?</p>
+            <div class="flex gap-4 w-full">
+                <button onclick="closeOverlay()" class="glass-btn flex-1 bg-dyn border border-dyn txt-dyn">Cancelar</button>
+                <button onclick="confirmLogout()" class="glass-btn flex-1 bg-red-600/90 text-white shadow-xl hover:bg-red-600 border-none">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="blob-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <header id="main-header" style="padding-top: max(1rem, env(safe-area-inset-top));" class="fixed top-0 w-full h-[5rem] z-50 transition-all duration-300 ease-in-out flex items-center px-4 bg-transparent border-none pointer-events-none">
+        <div class="flex-1"></div>
+        <div class="brand-container pointer-events-auto flex-shrink-0" onclick="goToHome()" title="Voltar ao Início">
+            <div class="brand-mark">
+                <div class="brand-mark-blob"></div>
+                <div class="brand-mark-play"></div>
+                <svg class="sparkle sparkle-3" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+            </div>
+            <div class="relative">
+                <h1 class="logo-text" data-text="QUEERFLIX">QUEERFLIX</h1>
+                <svg class="sparkle sparkle-2" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+                <svg class="sparkle sparkle-1" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+                <svg class="sparkle sparkle-4" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+                <svg class="sparkle sparkle-5" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+            </div>
+        </div>
+        <div class="flex-1 flex justify-end pointer-events-auto">
+            <button class="relative p-2 rounded-full hover:bg-[var(--glass-bg)] transition-colors active:scale-95">
+                <i data-lucide="bell" class="w-6 h-6 txt-dyn drop-shadow-md"></i>
+                <span class="absolute top-1.5 right-2 w-2.5 h-2.5 bg-red-600 rounded-full border border-black shadow-sm"></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="pt-[5.5rem]">
+        <div id="tab-inicio" class="tab-pane block infinite-scroll-area pt-2 tab-enter">
+            
+
+            <div id="dynamic-home-carousels" class="flex flex-col gap-6 pb-8 pt-2 w-full"></div>
+
+            
+        </div>
+
+        <div id="tab-explorar" class="tab-pane hidden infinite-scroll-area pt-4">
+            <div class="px-4 w-full flex flex-col gap-4 relative z-10">
+                <div class="relative w-full shadow-lg flex items-center bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-2xl backdrop-blur-md focus-within:bg-[var(--glass-active)] transition-all">
+                    <i data-lucide="search" class="absolute left-4 w-5 h-5 txt-dyn-muted pointer-events-none"></i>
+                    <input type="text" id="explore-search" placeholder="Pesquisar títulos..." class="w-full bg-transparent text-[var(--dynamic-text)] outline-none pl-12 pr-4 py-3 font-medium placeholder-[var(--dynamic-text-muted)]" oninput="resetPageAndRender()">
+                </div>
+                <div class="flex gap-2 w-full">
+                    <div class="relative flex-1">
+                        <select id="explore-year" class="glass-input w-full py-3 px-3 text-sm appearance-none bg-transparent" onchange="resetPageAndRender()"><option value="" class="text-black">Anos</option></select>
+                        <i data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 txt-dyn-muted pointer-events-none"></i>
+                    </div>
+                    <div class="relative flex-1">
+                        <select id="explore-streaming" class="glass-input w-full py-3 px-3 text-sm appearance-none bg-transparent" onchange="resetPageAndRender()">
+                            <option value="" class="text-black">Streaming</option>
+                            <option value="Netflix" class="text-black">Netflix</option>
+                            <option value="Max" class="text-black">Max</option>
+                            <option value="Amazon Prime Video" class="text-black">Prime Video</option>
+                            <option value="Disney Plus" class="text-black">Disney+</option>
+                            <option value="Apple TV Plus" class="text-black">Apple TV+</option>
+                            <option value="Globoplay" class="text-black">Globoplay</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 txt-dyn-muted pointer-events-none"></i>
+                    </div>
+                    <button onclick="resetExploreFilters()" class="glass-btn py-3 px-3 text-sm w-auto shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+            <div id="explore-grid" class="grid grid-cols-4 gap-3 px-4 mt-6"></div>
+            <div id="explore-pagination" class="flex items-center justify-center gap-2 mt-8 pb-4"></div>
+        </div>
+        
+        <div id="tab-perfil" class="tab-pane hidden infinite-scroll-area px-4">
+            <div class="auth-wrapper">
+                <div class="w-full max-w-md px-4 relative overflow-hidden">
+                    <div id="auth-loading" class="flex flex-col items-center w-full gap-6 mt-4">
+                        <div class="w-48 h-48 rounded-full skeleton"></div>
+                        <div class="flex flex-col items-center gap-2 w-full mt-2"><div class="w-48 h-8 skeleton"></div><div class="w-32 h-4 skeleton"></div></div>
+                        <div class="w-full h-[1px] bg-dyn border-dyn my-2"></div>
+                        <div class="w-full h-14 skeleton"></div>
+                    </div>
+
+                    <form id="form-login" class="hidden flex-col gap-6 w-full transition-all mt-4">
+                        <div class="text-center mb-6"><h2 class="text-4xl font-black tracking-wide drop-shadow-lg txt-dyn">Entrar</h2><p class="txt-dyn-muted text-base mt-2 drop-shadow-md font-medium">Bem-vindo de volta</p></div>
+                        <div class="flex flex-col gap-5">
+                            <input type="email" id="login-email" placeholder="Seu E-mail" required class="glass-input shadow-lg">
+                            <div class="relative w-full shadow-lg rounded-2xl flex items-center bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-md">
+                                <input type="password" id="login-password" placeholder="Sua Senha" required class="w-full bg-transparent text-[var(--dynamic-text)] outline-none pl-4 pr-12 py-4 font-medium placeholder-[var(--dynamic-text-muted)]">
+                                <button type="button" class="absolute right-4 txt-dyn-muted hover:txt-dyn p-1" onclick="togglePassword('login-password', 'icon-eye-login')"><i id="icon-eye-login" data-lucide="eye" class="w-6 h-6"></i></button>
+                            </div>
+                        </div>
+                        <button type="submit" id="btn-login" class="liquid-glass-active glass-btn mt-6 shadow-xl hover:scale-[1.02]"><span class="btn-text">Entrar</span><svg class="loading-star" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></button>
+                        <p class="text-center text-base txt-dyn-muted mt-6 drop-shadow-md">Não tem uma conta? <span class="font-black txt-dyn cursor-pointer hover:underline tracking-wide" onclick="switchAuthMode('signup')">Criar conta</span></p>
+                    </form>
+
+                    <form id="form-signup" class="hidden flex-col gap-5 w-full transition-all mt-2">
+                        <div class="text-center mb-4"><h2 class="text-4xl font-black tracking-wide drop-shadow-lg txt-dyn">Cadastrar</h2></div>
+                        <div class="flex flex-col items-center mb-2">
+                            <label for="signup-photo" class="img-preview-container shadow-lg" id="photo-container"><i data-lucide="camera" class="w-10 h-10 preview-icon" id="camera-icon"></i><img id="photo-preview" class="preview-image" src="" alt="Preview"><div id="photo-spinner" class="absolute inset-0 bg-black/50 hidden items-center justify-center z-10 rounded-full"><svg class="w-8 h-8 animate-spin fill-[#FFFF00]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></div></label>
+                            <input type="file" id="signup-photo" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <input type="text" id="signup-name" placeholder="Nome Completo" required class="glass-input shadow-lg">
+                            <input type="email" id="signup-email" placeholder="E-mail" required class="glass-input shadow-lg">
+                            <div class="relative w-full shadow-lg rounded-2xl flex items-center bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-md">
+                                <input type="password" id="signup-password" placeholder="Criar Senha" required minlength="6" class="w-full bg-transparent text-[var(--dynamic-text)] outline-none pl-4 pr-12 py-4 font-medium placeholder-[var(--dynamic-text-muted)]">
+                                <button type="button" class="absolute right-4 txt-dyn-muted hover:txt-dyn p-1" onclick="togglePassword('signup-password', 'icon-eye-signup')"><i id="icon-eye-signup" data-lucide="eye" class="w-6 h-6"></i></button>
+                            </div>
+                        </div>
+                        <button type="submit" id="btn-signup" class="liquid-glass-active glass-btn mt-6 shadow-xl hover:scale-[1.02]"><span class="btn-text">Criar Conta</span><svg class="loading-star" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></button>
+                        <p class="text-center text-base txt-dyn-muted mt-6 drop-shadow-md">Já tem conta? <span class="font-black txt-dyn cursor-pointer hover:underline tracking-wide" onclick="switchAuthMode('login')">Entrar</span></p>
+                    </form>
+
+                    <div id="user-profile-view" class="hidden flex-col items-center w-full gap-4 mt-2">
+                        <div class="profile-bubble-container"><div class="profile-bubble relative"><img id="profile-pic" src="" alt="Foto de Perfil" class="w-full h-full rounded-full object-cover"></div></div>
+                        <div class="text-center w-full flex flex-col items-center mt-3">
+                            <div class="flex items-center justify-center gap-3 w-full">
+                                <svg class="w-7 h-7 fill-[#FFFF00] filter drop-shadow-[0_0_6px_#FFA500] animate-[sparkle-twinkle_2s_ease-in-out_infinite_alternate]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+                                <h2 id="profile-name" class="text-4xl font-black truncate drop-shadow-lg txt-dyn">Nome</h2>
+                                <svg class="w-7 h-7 fill-[#FFFF00] filter drop-shadow-[0_0_6px_#FFA500] animate-[sparkle-twinkle_2.5s_ease-in-out_infinite_alternate-reverse]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg>
+                            </div>
+                            <div onclick="copyUID()" class="mt-4 flex items-center justify-center gap-2 bg-dyn hover:bg-[var(--glass-active)] border border-dyn px-4 py-1.5 rounded-full cursor-pointer transition-all shadow-sm active:scale-95"><span class="text-xs font-mono txt-dyn-muted tracking-widest font-bold">UID: <span id="profile-uid"></span></span><i data-lucide="copy" class="w-3.5 h-3.5 txt-dyn-muted"></i></div>
+                        </div>
+                        <div class="w-full h-[1px] bg-dyn border-t border-dyn my-3 shadow-sm"></div>
+                        <div class="w-full flex flex-col gap-4">
+                            <button id="btn-admin-panel" onclick="openOverlay('admin-view')" class="hidden liquid-glass glass-btn txt-dyn hover:scale-[1.02] justify-center shadow-lg font-bold"><i data-lucide="shield-check" class="w-6 h-6 text-[#FFFF00] filter drop-shadow-[0_0_4px_#FFA500]"></i><span>Painel ADM</span></button>
+                            <button onclick="openEditProfileModal()" class="liquid-glass glass-btn txt-dyn hover:scale-[1.02] justify-center shadow-lg font-bold"><i data-lucide="edit-2" class="w-6 h-6"></i><span>Editar Perfil</span></button>
+                            <button onclick="openSettingsModal()" class="liquid-glass glass-btn txt-dyn hover:scale-[1.02] justify-center shadow-lg font-bold"><i data-lucide="settings" class="w-6 h-6"></i><span>Configurações</span></button>
+                            <button onclick="openOverlay('logout-modal')" class="glass-btn bg-red-600/90 text-white font-black text-lg shadow-xl hover:bg-red-600 border-none hover:scale-[1.02]">Sair da Conta</button>
+                        </div>
+                        <div class="w-full flex flex-col items-center gap-1.5 mt-2 mb-4">
+                            <p class="text-[0.65rem] txt-dyn-muted font-bold tracking-widest uppercase">Desenvolvido por Leonardo</p>
+                            <button onclick="openOverlay('legal-modal')" class="text-[0.65rem] txt-dyn-muted hover:txt-dyn underline opacity-80 transition-colors">Aviso Legal</button>
+                        </div>
+<div class="flex items-center justify-center gap-8 mt-6 w-full pb-4">
+                            <a href="https://t.me/queerfIix" target="_blank" rel="noopener noreferrer" class="hover:scale-110 transition-transform cursor-pointer"><svg viewBox="0 0 24 24" class="w-8 h-8 fill-[#24A1DE] drop-shadow-md"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+                            <a href="#" title="Em Breve" class="hover:scale-110 transition-transform cursor-pointer"><svg viewBox="0 0 24 24" class="w-8 h-8 fill-white drop-shadow-md"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></a>
+                            <a href="https://whatsapp.com/channel/0029Vb8MqWPFMqrYXG5yNe3i" target="_blank" rel="noopener noreferrer" class="hover:scale-110 transition-transform cursor-pointer"><svg viewBox="0 0 24 24" class="w-8 h-8 fill-[#25D366] drop-shadow-md"><path d="M12.031 0C5.397 0 .015 5.378.015 12.012c0 2.12.553 4.195 1.6 6.01L.004 24l6.113-1.604c1.745.952 3.69 1.455 5.688 1.455h.004c6.634 0 12.016-5.38 12.016-12.016 0-3.216-1.252-6.24-3.528-8.514A11.94 11.94 0 0 0 12.031 0Zm6.568 17.15c-.274.773-1.585 1.468-2.185 1.516-.566.046-1.332.222-4.305-1.008-3.585-1.486-5.89-5.148-6.07-5.385-.18-.238-1.45-1.93-1.45-3.68 0-1.75.918-2.608 1.246-2.956.327-.346.713-.432.95-.432.237 0 .474.004.686.012.218.01.512-.086.8.616.297.72 1.01 2.456 1.1 2.646.09.19.148.412.03.65-.118.238-.18.384-.356.592-.178.208-.372.44-.533.592-.18.17-.367.356-.153.722.213.366.948 1.564 2.035 2.533 1.4 1.25 2.556 1.636 2.932 1.815.375.178.594.152.817-.104.223-.256.95-1.11 1.204-1.49.254-.38.508-.316.848-.19.34.128 2.152 1.014 2.522 1.203.37.19.617.284.706.444.089.16.089.928-.185 1.7Z"/></svg></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div id="tab-grupo" class="tab-pane hidden infinite-scroll-area pt-4 px-4">
+            <div class="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+                <div class="w-20 h-20 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-lg mb-2">
+                    <i data-lucide="users" class="w-10 h-10 txt-dyn"></i>
+                </div>
+                <h2 class="text-3xl font-black txt-dyn drop-shadow-md">Watch Party</h2>
+                <p class="txt-dyn-muted text-sm max-w-[250px] font-medium leading-relaxed">Em breve você poderá assistir seus filmes e séries favoritos simultaneamente com seus amigos!</p>
+            </div>
+        </div>
+
+        <div id="tab-chat" class="tab-pane hidden infinite-scroll-area pt-4 px-4">
+            <div class="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
+                <div class="w-20 h-20 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-lg mb-2">
+                    <i data-lucide="message-square" class="w-10 h-10 txt-dyn"></i>
+                </div>
+                <h2 class="text-3xl font-black txt-dyn drop-shadow-md">Chat Global</h2>
+                <p class="txt-dyn-muted text-sm max-w-[250px] font-medium leading-relaxed">Em breve um espaço exclusivo para toda a comunidade debater e compartilhar recomendações.</p>
+            </div>
+        </div>
+</main>
+
+    <nav id="bottom-nav" style="padding-bottom: env(safe-area-inset-bottom);" class="fixed bottom-0 left-0 w-full h-[4.5rem] bg-transparent backdrop-blur-lg z-50 flex justify-around items-center px-2 transition-transform duration-500 ease-in-out border-none border-t border-[var(--glass-border)]">
+        <button class="nav-btn liquid-glass-active rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 group hover:bg-[var(--glass-active)]" data-tab="inicio"><i data-lucide="home" class="nav-icon w-6 h-6 group-hover:scale-110"></i></button>
+        <button class="nav-btn rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 group hover:bg-[var(--glass-active)]" data-tab="explorar"><i data-lucide="search" class="nav-icon w-6 h-6 group-hover:scale-110"></i></button>
+        <button class="nav-btn rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 group hover:bg-[var(--glass-active)]" data-tab="grupo"><i data-lucide="users" class="nav-icon w-6 h-6 group-hover:scale-110"></i></button>
+        <button class="nav-btn rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 group hover:bg-[var(--glass-active)]" data-tab="chat"><i data-lucide="message-square" class="nav-icon w-6 h-6 group-hover:scale-110"></i></button>
+        <button class="nav-btn rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 group hover:bg-[var(--glass-active)]" data-tab="perfil"><i data-lucide="user" class="nav-icon w-6 h-6 group-hover:scale-110"></i></button>
+    </nav>
+<button id="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-[5.5rem] right-4 z-40 bg-[var(--glass-active)] backdrop-blur-md border border-[var(--glass-border)] w-12 h-12 rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] transition-all duration-300 opacity-0 pointer-events-none group"><i data-lucide="arrow-up" class="w-6 h-6 txt-dyn group-active:scale-95"></i></button>
+
+    <script>
+        lucide.createIcons();
+
+        let appConfig = JSON.parse(localStorage.getItem('queerflix-theme')) || { mode: 'animado', color: '#E40303', intensity: 1 };
+        let tempConfig = { ...appConfig };
+
+        function applyTheme(config) {
+            const html = document.documentElement;
+            const body = document.body;
+            let colorStr = ''; let rawColor = '';
+            if (config.mode === 'animado') { 
+                html.classList.add('rainbow-animated'); body.classList.add('rainbow-animated'); 
+                html.style.backgroundColor = ''; body.style.backgroundColor = ''; 
+                colorStr = 'transparent'; rawColor = '#E40303';
+            } else { 
+                html.classList.remove('rainbow-animated'); body.classList.remove('rainbow-animated'); 
+                if(config.color === '#000000') { colorStr = `rgba(0,0,0, ${config.intensity})`; rawColor = '#000000'; }
+                else if(config.color === '#FFFFFF') { colorStr = `rgba(255,255,255, ${config.intensity})`; rawColor = '#FFFFFF'; }
+                else { const hex = config.color.replace('#', ''); const r = parseInt(hex.substring(0, 2), 16); const g = parseInt(hex.substring(2, 4), 16); const b = parseInt(hex.substring(4, 6), 16); colorStr = `rgba(${r}, ${g}, ${b}, ${config.intensity})`; rawColor = config.color; }
+                html.style.backgroundColor = colorStr; body.style.backgroundColor = colorStr;
+            }
+            html.style.setProperty('--theme-color-raw', rawColor);
+            html.style.setProperty('--theme-color-bg', colorStr);
+            const metaThemeColor = document.getElementById('cor-navegador');
+            if (metaThemeColor) metaThemeColor.setAttribute('content', rawColor);
+        }
+        applyTheme(appConfig);
+
+        const metaThemeColor = document.getElementById('cor-navegador');
+        let ultimaAtualizacao = 0;
+        function rgbToHex(rgb) { const match = rgb.match(/[\d.]+/g); if (!match) return '#E40303'; const r = parseInt(match[0]); const g = parseInt(match[1]); const b = parseInt(match[2]); return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase(); }
+
+        function syncBrowserColor(timestamp) {
+            if (timestamp - ultimaAtualizacao > 150) {
+                const rawThemeColor = document.documentElement.style.getPropertyValue('--theme-color-raw') || '#E40303';
+                if (document.getElementById('admin-view').classList.contains('active')) {
+                    metaThemeColor.setAttribute('content', '#111111');
+                } else if (document.getElementById('player-view').classList.contains('active')) {
+                    metaThemeColor.setAttribute('content', rawThemeColor);
+                } else {
+                    metaThemeColor.setAttribute('content', rawThemeColor);
+                    const bgStr = window.getComputedStyle(document.body).backgroundColor;
+                    const match = bgStr.match(/[\d.]+/g);
+                    if (match) {
+                        const r = parseInt(match[0]); const g = parseInt(match[1]); const b = parseInt(match[2]); const a = match[3] ? parseFloat(match[3]) : 1;
+                        const brightness = ((r * a) * 299 + (g * a) * 587 + (b * a) * 114) / 1000;
+                        const root = document.documentElement;
+                        if (brightness > 140) { 
+                            root.style.setProperty('--dynamic-text', '#1a1a1a'); root.style.setProperty('--dynamic-text-muted', 'rgba(0,0,0,0.6)'); root.style.setProperty('--glass-border', 'rgba(0,0,0,0.15)'); root.style.setProperty('--glass-bg', 'rgba(0,0,0,0.05)'); root.style.setProperty('--glass-active', 'rgba(0,0,0,0.12)');
+                        } else { 
+                            root.style.setProperty('--dynamic-text', '#ffffff'); root.style.setProperty('--dynamic-text-muted', 'rgba(255,255,255,0.7)'); root.style.setProperty('--glass-border', 'rgba(255,255,255,0.2)'); root.style.setProperty('--glass-bg', 'rgba(255,255,255,0.05)'); root.style.setProperty('--glass-active', 'rgba(255,255,255,0.15)');
+                        }
+                    }
+                }
+                ultimaAtualizacao = timestamp;
+            }
+            requestAnimationFrame(syncBrowserColor);
+        }
+        requestAnimationFrame(syncBrowserColor);
+
+        // NAVEGAÇÃO E HISTÓRICO 
+        window.activeOverlays = [];
+
+        window.openOverlay = function(overlayId, params = {}) {
+            const el = document.getElementById(overlayId); if(!el) return;
+            el.classList.remove('hidden'); setTimeout(() => { el.classList.add('active'); }, 10);
+            if(window.activeOverlays.length === 0) {
+                document.body.dataset.scrollY = window.scrollY;
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${window.scrollY}px`;
+                document.body.style.width = '100%';
+                document.body.style.overflow = 'hidden';
+            }
+            window.activeOverlays.push(overlayId);
+            try {
+                const searchParams = new URLSearchParams(window.location.search);
+                if(params.id) searchParams.set('id', params.id); else searchParams.set('view', overlayId);
+                const newUrl = `${window.location.pathname}?${searchParams.toString()}`; history.pushState({ overlayId }, '', newUrl);
+            } catch (e) { console.warn('History API bloqueada no preview.'); }
+        }
+
+        window.closeOverlay = function(fromHistory = false) {
+            if(window.activeOverlays.length === 0) return;
+            const overlayId = window.activeOverlays.pop(); const el = document.getElementById(overlayId);
+            if(window.activeOverlays.length === 0) {
+                const scrollY = document.body.dataset.scrollY;
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                document.body.style.overflow = '';
+                window.scrollTo(0, parseInt(scrollY || '0'));
+            }
+            if(el) { 
+                el.classList.remove('active'); 
+                if(overlayId === 'player-view') closePlayerLogic();
+                setTimeout(() => { if(overlayId === 'admin-publish') closePublishForm(); }, 400); 
+            }
+            if(!fromHistory) {
+                try {
+                    const searchParams = new URLSearchParams(window.location.search); searchParams.delete('id'); searchParams.delete('view');
+                    const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname; history.replaceState({}, '', newUrl);
+                } catch (e) {}
+            }
+        }
+
+        window.addEventListener('popstate', (e) => { if (window.activeOverlays.length > 0) { window.closeOverlay(true); } });
+
+        window.goToHome = function() { const btnInicio = document.querySelector('[data-tab="inicio"]'); if(btnInicio) { btnInicio.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+
+        const buttons = document.querySelectorAll('.nav-btn'); const tabs = document.querySelectorAll('.tab-pane');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => { b.classList.remove('liquid-glass-active'); }); btn.classList.add('liquid-glass-active');
+                tabs.forEach(tab => { tab.classList.add('hidden'); tab.classList.remove('block', 'tab-enter'); });
+                const targetId = btn.getAttribute('data-tab'); const targetTab = document.getElementById(`tab-${targetId}`);
+                targetTab.classList.remove('hidden'); targetTab.classList.add('block'); void targetTab.offsetWidth; targetTab.classList.add('tab-enter');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if(targetId === 'explorar') resetPageAndRender(); 
+            });
+        });
+
+        let lastScrollTop = 0; const header = document.getElementById('main-header'); const nav = document.getElementById('bottom-nav');
+        const btnScrollTop = document.getElementById('btn-scroll-top');
+        window.addEventListener('scroll', () => {
+            let currentScroll = window.pageYOffset || document.documentElement.scrollTop; if (currentScroll < 0) return;
+            
+            if (currentScroll > 15) {
+                header.classList.add('bg-[var(--glass-bg)]', 'backdrop-blur-2xl', 'shadow-sm', 'border-b', 'border-[var(--glass-border)]');
+                header.classList.remove('bg-transparent', 'border-none');
+            } else {
+                header.classList.remove('bg-[var(--glass-bg)]', 'backdrop-blur-2xl', 'shadow-sm', 'border-b', 'border-[var(--glass-border)]');
+                header.classList.add('bg-transparent', 'border-none');
+            }
+
+            if (currentScroll > lastScrollTop && currentScroll > 50) { header.classList.add('-translate-y-full'); nav.classList.add('translate-y-[150%]'); } 
+            else { header.classList.remove('-translate-y-full'); nav.classList.remove('translate-y-[150%]'); }
+            
+            if (currentScroll > 400 && document.getElementById('tab-inicio').classList.contains('block')) {
+                if(btnScrollTop) { btnScrollTop.classList.remove('opacity-0', 'pointer-events-none'); btnScrollTop.classList.add('opacity-100', 'pointer-events-auto'); }
+            } else {
+                if(btnScrollTop) { btnScrollTop.classList.add('opacity-0', 'pointer-events-none'); btnScrollTop.classList.remove('opacity-100', 'pointer-events-auto'); }
+            }
+            lastScrollTop = currentScroll;
+        });
+
+        // UTILITÁRIOS
+        window.showToast = function(message, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); toast.className = `toast ${type}`; const icon = type === 'success' ? '<i data-lucide="check-circle" class="w-6 h-6 text-[#008026]"></i>' : '<i data-lucide="alert-circle" class="w-6 h-6 text-[#E40303]"></i>'; toast.innerHTML = `${icon} <span class="font-bold text-[1rem] tracking-wide">${message}</span>`; container.appendChild(toast); lucide.createIcons({ root: toast }); setTimeout(() => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 400); }, 3000); };
+        window.switchAuthMode = function(mode) { document.getElementById('form-login').classList.toggle('hidden', mode === 'signup'); document.getElementById('form-signup').classList.toggle('hidden', mode === 'login'); };
+        window.togglePassword = function(inputId, iconId) { const input = document.getElementById(inputId); const icon = document.getElementById(iconId); if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); } else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); } lucide.createIcons(); };
+        window.handlePhotoSelect = function(event) { const file = event.target.files[0]; if (file) { window.selectedFile = file; const reader = new FileReader(); reader.onload = function(e) { const img = document.getElementById('photo-preview'); img.src = e.target.result; img.style.display = 'block'; document.getElementById('camera-icon').style.display = 'none'; document.getElementById('photo-container').style.borderStyle = 'solid'; }; reader.readAsDataURL(file); } };
+        window.uploadToImgBB = async function(file) { const formData = new FormData(); formData.append('image', file); try { const res = await fetch(`https://api.imgbb.com/1/upload?key=9a792281a6220ed358215ad0c1e4162e`, { method: 'POST', body: formData }); const data = await res.json(); return data.data.url; } catch (e) { return null; } };
+        window.copyUID = function() { const uidText = document.getElementById('profile-uid').innerText; if(navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(uidText).then(() => { showToast('UID copiado!', 'success'); }); } else { let textArea = document.createElement("textarea"); textArea.value = uidText; textArea.style.position = "fixed"; textArea.style.left = "-999999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); showToast('UID copiado!', 'success'); } catch (err) { showToast('Erro ao copiar', 'error'); } textArea.remove(); } }
+        
+        window.openLogoutModal = function() { openOverlay('logout-modal'); }
+        window.closeLogoutModal = function() { closeOverlay(); }
+        function openSettingsModal() { tempConfig = { ...appConfig }; updateSettingsUI(); openOverlay('settings-modal'); }
+        function closeSettingsModal() { closeOverlay(); }
+        function cancelSettings() { applyTheme(appConfig); closeSettingsModal(); }
+        function saveSettings() { appConfig = { ...tempConfig }; localStorage.setItem('queerflix-theme', JSON.stringify(appConfig)); applyTheme(appConfig); closeSettingsModal(); showToast('Aparência salva!', 'success'); }
+        function updateSettingsUI() { 
+            const btnAnim = document.getElementById('btn-mode-animado'); const btnEst = document.getElementById('btn-mode-estatico'); const painel = document.getElementById('panel-cores'); 
+            if (tempConfig.mode === 'animado') { 
+                btnAnim.classList.replace('txt-dyn-muted', 'txt-dyn'); btnAnim.classList.add('bg-[var(--glass-active)]', 'shadow-sm'); 
+                btnEst.classList.replace('txt-dyn', 'txt-dyn-muted'); btnEst.classList.remove('bg-[var(--glass-active)]', 'shadow-sm'); 
+                painel.classList.add('hidden'); painel.classList.remove('flex');
+            } else { 
+                btnEst.classList.replace('txt-dyn-muted', 'txt-dyn'); btnEst.classList.add('bg-[var(--glass-active)]', 'shadow-sm'); 
+                btnAnim.classList.replace('txt-dyn', 'txt-dyn-muted'); btnAnim.classList.remove('bg-[var(--glass-active)]', 'shadow-sm'); 
+                painel.classList.remove('hidden'); painel.classList.add('flex');
+                document.querySelectorAll('.color-picker-btn').forEach(b => { 
+                    b.classList.remove('active'); 
+                    const bgStyle = b.style.backgroundColor.replace(/\s+/g, '').toUpperCase();
+                    let hexCompare = tempConfig.color.toUpperCase();
+                    if(hexCompare === '#000000') hexCompare = 'RGB(0,0,0)'; if(hexCompare === '#FFFFFF') hexCompare = 'RGB(255,255,255)';
+                    if(bgStyle === hexToRgbString(tempConfig.color).replace(/\s+/g, '').toUpperCase() || bgStyle === hexCompare) { b.classList.add('active'); } 
+                }); 
+                document.getElementById('intensity-slider').value = tempConfig.intensity; 
+            } 
+            applyTheme(tempConfig); 
+        }
+        function hexToRgbString(hex) { if(hex==='#FFFFFF') return 'rgb(255,255,255)'; if(hex==='#000000') return 'rgb(0,0,0)'; const r = parseInt(hex.slice(1, 3), 16); const g = parseInt(hex.slice(3, 5), 16); const b = parseInt(hex.slice(5, 7), 16); return `rgb(${r}, ${g}, ${b})`; }
+        function changeMode(mode) { tempConfig.mode = mode; updateSettingsUI(); }
+        function selectColor(hexCode, element) { tempConfig.color = hexCode; updateSettingsUI(); }
+        function changeIntensity(value) { tempConfig.intensity = parseFloat(value); applyTheme(tempConfig); }
+
+        window.deleteTargetId = null;
+        window.openDeleteModal = function(id) { window.deleteTargetId = id; openOverlay('delete-confirm-modal'); }
+        window.closeDeleteModal = function() { window.deleteTargetId = null; closeOverlay(); }
+
+        // MINHA LISTA (Requer Login Agora)
+        window.myListItems = JSON.parse(localStorage.getItem('queerflix-list')) || [];
+        window.toggleMyList = function() {
+            if(!window.isUserLoggedIn) { showToast("Faça login para salvar na lista.", "error"); return; }
+            if(!window.currentDetailContent) return;
+            const id = window.currentDetailContent.id;
+            
+            if(window.myListItems.includes(id)) {
+                window.myListItems = window.myListItems.filter(x => x !== id); showToast('Removido da lista', 'success');
+            } else {
+                window.myListItems.push(id); showToast('Salvo na lista!', 'success');
+            }
+            localStorage.setItem('queerflix-list', JSON.stringify(window.myListItems));
+            window.updateDetailsListIcon(id); window.renderMyListCarousel();
+        }
+
+        window.updateDetailsListIcon = function(id) {
+            const btn = document.getElementById('det-btn-save'); const icon = document.getElementById('save-icon'); const text = document.getElementById('save-text');
+            if(!btn) return;
+            if(window.myListItems.includes(id)) {
+                btn.classList.add('border-green-500/50', 'bg-green-500/10');
+                icon.setAttribute('data-lucide', 'check'); icon.classList.add('text-green-500'); icon.classList.remove('text-white');
+                text.innerText = 'Na Lista'; text.classList.add('text-green-500'); text.classList.remove('text-white');
+            } else {
+                btn.classList.remove('border-green-500/50', 'bg-green-500/10');
+                icon.setAttribute('data-lucide', 'plus'); icon.classList.add('text-white'); icon.classList.remove('text-green-500');
+                text.innerText = 'Minha Lista'; text.classList.add('text-white'); text.classList.remove('text-green-500');
+            }
+            lucide.createIcons();
+        }
+
+        window.getMyListContent = function() { return window.allContentData.filter(c => window.myListItems.includes(c.id) && c.status === 'published'); }
+
+        // COMPARTILHAMENTO
+        window.shareContent = function() {
+            if(!window.currentDetailContent) return;
+            const title = window.currentDetailContent.title;
+            let baseUrl = window.location.origin + window.location.pathname;
+            if (baseUrl.startsWith('blob:')) baseUrl = 'https://queerflix.app/'; // Fallback estético 
+            const url = `${baseUrl}?id=${window.currentDetailContent.id}`;
+            const text = `Assista "${title}" no Queerflix!! ${url}`;
+            if(navigator.share) { navigator.share({ title: 'Queerflix', text: text, url: url }).catch(e => copyFallback(text)); } else { copyFallback(text); }
+        }
+        function copyFallback(text) {
+            let textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; textArea.style.left = "-999999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); showToast('Link copiado!', 'success'); } catch (err) { showToast('Erro ao copiar', 'error'); } textArea.remove();
+        }
+
+        // =====================================================================
+        // MÓDULO ADM
+        // =====================================================================
+        const TMDB_KEY = 'd0f7e2c414b1efff7b000ae9b681ed1b';
+        let tmdbTimeout = null;
+        window.publishState = { id: null, tmdbId: '', mediaType: 'movie', title: '', originalTitle: '', posterUrl: '', synopsis: '', genres: '', actors: '', date: '', status: 'published', movieLinks: [], tvSeasons: [] };
+
+        window.openPublishForm = function(isEdit = false) { 
+            document.getElementById('admin-menu').classList.add('hidden'); document.getElementById('admin-edit-list').classList.add('hidden');
+            openOverlay('admin-publish'); document.getElementById('admin-publish').classList.add('flex');
+            document.getElementById('publish-form-title').innerText = isEdit ? 'Editar Publicação' : 'Nova Publicação'; document.getElementById('tmdb-search-box').style.display = isEdit ? 'none' : 'block';
+            if(!isEdit) window.resetPublishState();
+        }
+        window.closePublishForm = function() { document.getElementById('admin-publish').classList.add('hidden'); document.getElementById('admin-publish').classList.remove('flex'); document.getElementById('admin-menu').classList.remove('hidden'); window.resetPublishState(); }
+        
+        window.openEditList = function() { document.getElementById('admin-menu').classList.add('hidden'); openOverlay('admin-edit-list'); document.getElementById('admin-edit-list').classList.add('flex'); document.getElementById('admin-local-search').value = ''; window.renderEditListUI(); }
+        window.closeEditList = function() { closeOverlay(); document.getElementById('admin-menu').classList.remove('hidden'); }
+
+        window.resetPublishState = function() { window.publishState = { id: null, tmdbId: '', mediaType: 'movie', title: '', originalTitle: '', posterUrl: '', synopsis: '', genres: '', actors: '', date: '', status: 'published', movieLinks: [], tvSeasons: [] }; document.getElementById('tmdb-search').value = ''; document.getElementById('tmdb-results').classList.add('hidden'); document.getElementById('publish-form-data').classList.add('hidden'); document.getElementById('publish-media-section').classList.add('hidden'); document.getElementById('btn-review-publish').classList.add('hidden'); }
+
+        window.handleTMDBSearch = function(query) {
+            clearTimeout(tmdbTimeout); const resultsBox = document.getElementById('tmdb-results'); if(query.trim().length < 3) { resultsBox.classList.add('hidden'); return; }
+            tmdbTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&language=pt-BR&query=${encodeURIComponent(query)}`);
+                    const data = await res.json(); const filtered = data.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv').slice(0, 5);
+                    if(filtered.length > 0) {
+                        resultsBox.innerHTML = filtered.map(item => { const title = item.title || item.name; const year = (item.release_date || item.first_air_date || '').split('-')[0]; const poster = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'https://via.placeholder.com/92x138?text=Sem+Foto'; const typeLabel = item.media_type === 'movie' ? 'Filme' : 'Série'; return `<li onclick="selectTMDBItem('${item.id}', '${item.media_type}')" class="flex items-center gap-3 p-3 hover:bg-white/10 cursor-pointer transition-colors border-b border-white/5 last:border-0"><img src="${poster}" class="w-10 h-14 object-cover rounded shadow"><div class="flex flex-col"><span class="font-bold text-white text-[0.95rem] line-clamp-1">${title}</span><span class="text-xs text-white/50">${year} • ${typeLabel}</span></div></li>`; }).join(''); resultsBox.classList.remove('hidden');
+                    } else { resultsBox.innerHTML = `<li class="p-4 text-center text-white/50 text-sm">Nenhum resultado encontrado.</li>`; resultsBox.classList.remove('hidden'); }
+                } catch(e) {}
+            }, 500);
+        }
+
+        window.selectTMDBItem = async function(id, type) {
+            document.getElementById('tmdb-results').classList.add('hidden'); document.getElementById('tmdb-search').value = ''; window.showToast('Buscando detalhes...', 'success');
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${TMDB_KEY}&language=pt-BR&append_to_response=credits`); const data = await res.json();
+                window.publishState.tmdbId = id; window.publishState.mediaType = type; window.publishState.title = data.title || data.name; window.publishState.originalTitle = data.original_title || data.original_name || ''; window.publishState.date = data.release_date || data.first_air_date || ''; window.publishState.posterUrl = data.poster_path ? `https://image.tmdb.org/t/p/w342${data.poster_path}` : ''; window.publishState.genres = data.genres.map(g => g.name).join(', '); window.publishState.actors = data.credits.cast.slice(0, 3).map(c => c.name).join(', '); window.publishState.synopsis = data.overview || '';
+                window.populatePublishForm();
+            } catch (e) { window.showToast('Erro ao carregar dados', 'error'); }
+        }
+
+        window.populatePublishForm = function() {
+            document.getElementById('pub-title').innerText = window.publishState.title; document.getElementById('pub-date').innerText = window.publishState.date.split('-').reverse().join('/'); document.getElementById('pub-poster').src = window.publishState.posterUrl; document.getElementById('pub-type-badge').innerText = window.publishState.mediaType === 'movie' ? 'Filme' : 'Série'; document.getElementById('pub-synopsis').value = window.publishState.synopsis; document.getElementById('pub-genres').value = window.publishState.genres; document.getElementById('pub-actors').value = window.publishState.actors;
+            document.getElementById('publish-form-data').classList.remove('hidden'); document.getElementById('publish-form-data').classList.add('flex'); document.getElementById('btn-review-publish').classList.remove('hidden');
+            window.renderMediaSection();
+        }
+
+        window.renderMediaSection = function() {
+            const section = document.getElementById('publish-media-section'); const container = document.getElementById('media-content-container');
+            section.classList.remove('hidden'); section.classList.add('flex');
+            if (window.publishState.mediaType === 'movie') { container.innerHTML = window.publishState.movieLinks.map(link => window.createLinkHTML(link, 'movie')).join('') + `<button onclick="addMovieLink()" class="w-full py-3 rounded-xl border border-dashed border-white/30 text-white/70 hover:text-white hover:border-white/60 hover:bg-white/5 font-bold transition-all flex items-center justify-center gap-2 mt-2"><i data-lucide="plus-circle" class="w-5 h-5"></i> Adicionar Link</button>`;
+            } else {
+                container.innerHTML = window.publishState.tvSeasons.map(season => window.createSeasonHTML(season)).join('');
+                const existingNums = window.publishState.tvSeasons.map(s => s.seasonNum).sort((a,b)=>a-b); const max = existingNums.length > 0 ? existingNums[existingNums.length - 1] : 0; let missing = []; for(let i=1; i<max; i++) if(!existingNums.includes(i)) missing.push(i);
+                let btnHTML = ''; missing.forEach(m => { btnHTML += `<button onclick="addTvSeason(${m})" class="w-full py-3 rounded-xl bg-blue-500/10 text-blue-400 font-bold border border-blue-500/30 hover:bg-blue-500/20 transition-all flex items-center justify-center gap-2 mt-2"><i data-lucide="plus" class="w-5 h-5"></i> Adicionar Temporada ${m} (Removida)</button>`; });
+                btnHTML += `<button onclick="addTvSeason(${max + 1})" class="w-full py-3 rounded-xl border border-dashed border-white/30 text-white/70 hover:text-white hover:border-white/60 hover:bg-white/5 font-bold transition-all flex items-center justify-center gap-2 mt-2"><i data-lucide="folder-plus" class="w-5 h-5"></i> Adicionar Temporada ${max + 1}</button>`;
+                container.innerHTML += btnHTML;
+            }
+            lucide.createIcons();
+        }
+
+        window.createLinkHTML = function(link, type, seasonId = null) {
+            const sIdStr = seasonId ? `'${seasonId}'` : 'null';
+            return `<div class="bg-[#1a1a1a] border border-white/10 rounded-2xl p-4 flex flex-col gap-3 relative group"><button onclick="${type === 'movie' ? `removeMovieLink('${link.id}')` : `removeEpisode('${seasonId}', '${link.id}')`}" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-lg hover:scale-110 active:scale-95 transition-transform"><i data-lucide="x" class="w-4 h-4"></i></button><div class="flex items-center gap-2 mb-1"><span class="font-black text-white/50 text-sm uppercase tracking-widest">${type === 'movie' ? 'Link de Filme' : 'Episódio ' + link.epNum}</span></div><input type="url" value="${link.url}" onchange="updateLinkUrl('${link.id}', this.value, '${type}', ${sIdStr})" placeholder="Cole a URL do vídeo/iframe aqui..." class="w-full bg-[#111] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-white/40"><div class="flex gap-2 mt-1"><button onclick="toggleBadge('${link.id}', 'redirect', '${type}', ${sIdStr})" class="toggle-badge flex-1 flex items-center justify-center gap-1 ${link.redirect ? 'active-redirect' : ''}"><i data-lucide="external-link" class="w-4 h-4"></i> Redirecionar</button><button onclick="toggleBadge('${link.id}', 'sub', '${type}', ${sIdStr})" class="toggle-badge flex-1 flex items-center justify-center gap-1 ${link.sub ? 'active-sub' : ''}"><i data-lucide="subtitles" class="w-4 h-4"></i> Legendado</button></div></div>`;
+        }
+
+        window.createSeasonHTML = function(season) {
+            const existingEps = season.episodes.map(e => e.epNum).sort((a,b)=>a-b); const maxEp = existingEps.length > 0 ? existingEps[existingEps.length - 1] : 0; let missing = []; for(let i=1; i<maxEp; i++) if(!existingEps.includes(i)) missing.push(i);
+            let epsHTML = season.episodes.map(ep => window.createLinkHTML(ep, 'tv', season.seasonId)).join('');
+            missing.forEach(m => { epsHTML += `<button onclick="addEpisode('${season.seasonId}', ${m})" class="w-full py-2 rounded-lg bg-blue-500/10 text-blue-400 font-bold border border-blue-500/30 hover:bg-blue-500/20 text-sm mt-2">Adicionar Episódio ${m}</button>`; });
+            epsHTML += `<button onclick="addEpisode('${season.seasonId}', ${maxEp + 1})" class="w-full py-3 rounded-xl border border-dashed border-white/20 text-white/50 hover:text-white/80 hover:border-white/40 font-bold text-sm transition-all flex items-center justify-center gap-2 mt-2"><i data-lucide="plus-circle" class="w-4 h-4"></i> Adicionar Episódio ${maxEp + 1}</button>`;
+            return `<div class="bg-[#222] border border-white/10 rounded-[2rem] p-4 flex flex-col gap-4 relative"><div class="flex justify-between items-center px-2"><h5 class="text-xl font-black text-white">Temporada ${season.seasonNum}</h5><button onclick="removeTvSeason('${season.seasonId}')" class="text-red-500 hover:text-red-400 font-bold text-sm bg-red-500/10 px-3 py-1 rounded-full">Remover</button></div><div class="flex flex-col gap-3 pl-2 border-l-2 border-white/10 ml-2">${epsHTML}</div></div>`;
+        }
+
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+        window.addMovieLink = () => { window.publishState.movieLinks.push({ id: generateId(), url: '', redirect: false, sub: false }); window.renderMediaSection(); }
+        window.removeMovieLink = (id) => { window.publishState.movieLinks = window.publishState.movieLinks.filter(l => l.id !== id); window.renderMediaSection(); }
+        window.addTvSeason = (num) => { window.publishState.tvSeasons.push({ seasonId: generateId(), seasonNum: num, episodes: [] }); window.publishState.tvSeasons.sort((a,b) => a.seasonNum - b.seasonNum); window.renderMediaSection(); }
+        window.removeTvSeason = (id) => { window.publishState.tvSeasons = window.publishState.tvSeasons.filter(s => s.seasonId !== id); window.renderMediaSection(); }
+        window.addEpisode = (seasonId, num) => { const s = window.publishState.tvSeasons.find(s => s.seasonId == seasonId); if(s){ s.episodes.push({ id: generateId(), epNum: num, url: '', redirect: false, sub: false }); s.episodes.sort((a,b)=>a.epNum - b.epNum); window.renderMediaSection(); } }
+        window.removeEpisode = (seasonId, epId) => { const s = window.publishState.tvSeasons.find(s => s.seasonId == seasonId); if(s){ s.episodes = s.episodes.filter(e => e.id !== epId); window.renderMediaSection(); } }
+        window.updateLinkUrl = (linkId, val, type, seasonId) => { if(type === 'movie') { const l = window.publishState.movieLinks.find(l=>l.id===linkId); if(l) l.url = val; } else { const s = window.publishState.tvSeasons.find(s=>s.seasonId==seasonId); if(s){ const e = s.episodes.find(e=>e.id===linkId); if(e) e.url = val; } } }
+        window.toggleBadge = (linkId, prop, type, seasonId) => { if(type === 'movie') { const l = window.publishState.movieLinks.find(l=>l.id===linkId); if(l) { l[prop] = !l[prop]; window.renderMediaSection(); } } else { const s = window.publishState.tvSeasons.find(s=>s.seasonId==seasonId); if(s){ const e = s.episodes.find(e=>e.id===linkId); if(e) { e[prop] = !e[prop]; window.renderMediaSection(); } } } }
+
+        window.openPublishPreview = function() {
+            window.publishState.synopsis = document.getElementById('pub-synopsis').value; window.publishState.genres = document.getElementById('pub-genres').value; window.publishState.actors = document.getElementById('pub-actors').value;
+            const isMovie = window.publishState.mediaType === 'movie'; let summary = `TÍTULO: ${window.publishState.title}\nTIPO: ${isMovie ? 'Filme' : 'Série'}\n\n`;
+            if(isMovie) { summary += `LINKS: ${window.publishState.movieLinks.length}\n`; } else { summary += `TEMPORADAS: ${window.publishState.tvSeasons.length}\n`; }
+            document.getElementById('preview-content').innerText = summary; openOverlay('preview-modal');
+        }
+        window.closePublishPreview = function() { closeOverlay(); }
+
+        // =====================================================================
+        // HERO CAROUSEL, DETAILS PAGE, FULL GRID & PLAYER
+        // =====================================================================
+        let currentHeroIndex = 0; let heroItems = []; let heroInterval = null; let playerHls = null;
+
+        window.initHeroCarousel = async function(publishedData) {
+            heroItems = publishedData.slice(0, 10); const heroContainer = document.getElementById('hero-banner');
+            if (heroItems.length === 0) { heroContainer.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-white/50 font-bold">Sem destaques</div>'; return; }
+
+            for (let i=0; i<heroItems.length; i++) {
+                if (!heroItems[i].heroLoaded) {
+                    try {
+                        const res = await fetch(`https://api.themoviedb.org/3/${heroItems[i].mediaType}/${heroItems[i].tmdbId}?api_key=${TMDB_KEY}&language=pt-BR&append_to_response=images&include_image_language=pt,en,null`);
+                        const data = await res.json();
+                        heroItems[i].backdrop = data.backdrop_path ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}` : heroItems[i].posterUrl;
+                        let logoUrl = '';
+                        if (data.images && data.images.logos && data.images.logos.length > 0) {
+                            const ptLogo = data.images.logos.find(l => l.iso_639_1 === 'pt'); const enLogo = data.images.logos.find(l => l.iso_639_1 === 'en');
+                            logoUrl = `https://image.tmdb.org/t/p/w500${(ptLogo || enLogo || data.images.logos[0]).file_path}`;
+                        }
+                        heroItems[i].logoUrl = logoUrl; heroItems[i].heroLoaded = true;
+                    } catch(e) {}
+                }
+            }
+            heroContainer.innerHTML = heroItems.map((item, idx) => {
+                const logoHtml = item.logoUrl ? `<img src="${item.logoUrl}" class="w-full max-w-[150px] object-contain drop-shadow-2xl mb-4">` : `<h2 class="text-3xl font-black text-white drop-shadow-xl mb-4">${item.title}</h2>`;
+                return `<div id="hero-slide-${idx}" class="hero-slide w-full h-full ${idx === 0 ? 'active' : ''}">
+                    <img src="${item.backdrop}" class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 hero-gradient"></div>
+                    <div class="absolute bottom-6 left-6 w-full pr-8 flex flex-col items-start justify-end">${logoHtml}</div>
+                </div>`;
+            }).join('');
+            
+            heroContainer.onclick = () => { if(heroItems[currentHeroIndex]) openDetails(heroItems[currentHeroIndex].id); };
+            clearInterval(heroInterval); heroInterval = setInterval(() => { window.rotateHero(); }, 5000);
+        }
+
+        window.rotateHero = function() {
+            if(heroItems.length <= 1) return;
+            document.getElementById(`hero-slide-${currentHeroIndex}`).classList.remove('active');
+            currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
+            document.getElementById(`hero-slide-${currentHeroIndex}`).classList.add('active');
+        }
+
+        window.currentDetailContent = null; window.currentTMDBDetails = null;
+        window.tmdbCache = window.tmdbCache || {}; // Instancia o Cache
+
+        window.openDetails = async function(contentId) {
+            const content = window.allContentData.find(c => c.id === contentId); if(!content) return;
+            window.currentDetailContent = content; window.updateDetailsListIcon(contentId);
+            
+            // CORREÇÃO: Atrasa o registro de view no firebase em 1.5s para não travar a animação de abertura da página
+            if(window.trackContentView) setTimeout(() => window.trackContentView(contentId), 1500);
+            
+            openOverlay('details-view', { id: contentId });
+            
+            const scrollArea = document.getElementById('details-content-scroll'); const loader = document.getElementById('details-loading');
+            
+            document.getElementById('details-bg-poster').src = content.posterUrl; document.getElementById('det-poster').src = content.posterUrl; document.getElementById('det-title').innerText = content.title; document.getElementById('det-year').innerText = content.date ? content.date.split('-')[0] : ''; document.getElementById('det-genre').innerText = (content.genres && content.genres.split(',')[0]) || ''; document.getElementById('det-synopsis').innerText = content.synopsis || 'Nenhuma sinopse disponível.'; document.getElementById('det-btn-synopsis').innerText = 'Ver mais'; document.getElementById('det-synopsis').classList.add('clamp-4');
+            document.getElementById('det-btn-watch').classList.add('hidden'); document.getElementById('det-tv-section').classList.add('hidden'); document.getElementById('det-tv-section').classList.remove('flex'); 
+
+            // Carga Imediata Mágica! Aumenta absurdamente a fluidez removendo o bloqueio de tela.
+            scrollArea.classList.remove('hidden'); scrollArea.classList.add('flex'); loader.classList.add('hidden'); loader.classList.remove('flex'); 
+
+            try {
+                // CORREÇÃO: Utiliza o cache para acesso instantâneo se já tiver consultado esse filme/série antes
+                let tmdbData;
+                if(window.tmdbCache[content.tmdbId]) {
+                    tmdbData = window.tmdbCache[content.tmdbId];
+                } else {
+                    const res = await fetch(`https://api.themoviedb.org/3/${content.mediaType}/${content.tmdbId}?api_key=${TMDB_KEY}&language=pt-BR&append_to_response=credits,release_dates,content_ratings`);
+                    tmdbData = await res.json();
+                    window.tmdbCache[content.tmdbId] = tmdbData;
+                }
+
+                window.currentTMDBDetails = tmdbData;
+
+                let ageRating = 'L';
+                if (content.mediaType === 'movie' && tmdbData.release_dates && tmdbData.release_dates.results) { const br = tmdbData.release_dates.results.find(r => r.iso_3166_1 === 'BR'); if (br && br.release_dates[0].certification) ageRating = br.release_dates[0].certification; } 
+                else if (content.mediaType === 'tv' && tmdbData.content_ratings && tmdbData.content_ratings.results) { const br = tmdbData.content_ratings.results.find(r => r.iso_3166_1 === 'BR'); if (br && br.rating) ageRating = br.rating; }
+                const ageBadge = document.getElementById('det-age'); ageBadge.innerText = ageRating;
+                if(ageRating === 'L') ageBadge.style.backgroundColor = '#008000'; else if(ageRating === '10') ageBadge.style.backgroundColor = '#0080FF'; else if(ageRating === '12') ageBadge.style.backgroundColor = '#FFCC00'; else if(ageRating === '14') ageBadge.style.backgroundColor = '#FF8000'; else if(ageRating === '16' || ageRating === '18') ageBadge.style.backgroundColor = '#E40303'; else ageBadge.style.backgroundColor = 'rgba(255,255,255,0.1)';
+
+                const castContainer = document.getElementById('det-cast');
+                if (tmdbData.credits && tmdbData.credits.cast) { castContainer.innerHTML = tmdbData.credits.cast.slice(0, 8).map(actor => `<div class="flex flex-col items-center gap-2 shrink-0 w-20"><img src="${actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 'https://via.placeholder.com/150x150?text=Sem+Foto'}" class="w-16 h-16 rounded-full object-cover border-2 border-white/20 shadow-lg"><span class="text-xs text-white/80 text-center leading-tight line-clamp-2">${actor.name}</span></div>`).join(''); }
+
+                if (content.mediaType === 'movie') {
+                    if(content.movieLinks && content.movieLinks.length > 0) { document.getElementById('det-btn-watch').classList.remove('hidden'); }
+                } else if (content.mediaType === 'tv') {
+                    const tvSec = document.getElementById('det-tv-section'); tvSec.classList.remove('hidden'); tvSec.classList.add('flex');
+                    const select = document.getElementById('det-season-select'); const dbSeasons = content.tvSeasons || [];
+                    if (dbSeasons.length > 0) { select.innerHTML = dbSeasons.map(s => `<option value="${s.seasonNum}" class="text-black">Temporada ${s.seasonNum}</option>`).join(''); window.renderEpisodes(dbSeasons[0].seasonNum); } 
+                    else { select.innerHTML = `<option value="">Nenhuma Temporada</option>`; document.getElementById('det-episodes-list').innerHTML = '<p class="text-white/50 text-sm text-center">Episódios não encontrados.</p>'; }
+                }
+            } catch (e) { console.error('Erro Detalhes TMDB', e); }
+        }
+
+        window.toggleSynopsis = function() { const p = document.getElementById('det-synopsis'); const b = document.getElementById('det-btn-synopsis'); if (p.classList.contains('clamp-4')) { p.classList.remove('clamp-4'); b.innerText = 'Ver menos'; } else { p.classList.add('clamp-4'); b.innerText = 'Ver mais'; } }
+
+        window.renderEpisodes = async function(seasonNum) {
+            const list = document.getElementById('det-episodes-list'); list.innerHTML = '<div class="flex justify-center p-4"><svg class="w-8 h-8 animate-spin fill-[#FFFF00]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></div>';
+            const dbSeason = window.currentDetailContent.tvSeasons.find(s => s.seasonNum == seasonNum);
+            if(!dbSeason || !dbSeason.episodes || dbSeason.episodes.length === 0) { list.innerHTML = '<p class="text-white/50 text-sm text-center">Sem episódios nesta temporada.</p>'; return; }
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/tv/${window.currentDetailContent.tmdbId}/season/${seasonNum}?api_key=${TMDB_KEY}&language=pt-BR`); const tmdbSeason = await res.json();
+                let html = '';
+                dbSeason.episodes.sort((a,b)=>a.epNum - b.epNum).forEach(dbEp => {
+                    const tmdbEp = tmdbSeason.episodes ? tmdbSeason.episodes.find(e => e.episode_number == dbEp.epNum) : null;
+                    const title = tmdbEp ? tmdbEp.name : `Episódio ${dbEp.epNum}`; const img = (tmdbEp && tmdbEp.still_path) ? `https://image.tmdb.org/t/p/w300${tmdbEp.still_path}` : 'https://via.placeholder.com/300x170?text=Sem+Foto'; const runtime = (tmdbEp && tmdbEp.runtime) ? `${tmdbEp.runtime}m` : '--';
+                    let badges = []; if(dbEp.sub) badges.push('<span class="bg-green-500/20 text-green-400 text-[0.6rem] font-bold px-1.5 py-0.5 rounded border border-green-500/30 uppercase tracking-widest">LEG</span>'); if(dbEp.redirect) badges.push('<span class="bg-blue-500/20 text-blue-400 text-[0.6rem] font-bold px-1.5 py-0.5 rounded border border-blue-500/30 uppercase tracking-widest">REDIR</span>');
+                    html += `<div class="flex gap-4 items-center bg-white/5 border border-white/10 p-3 rounded-2xl cursor-pointer active:scale-95 transition-transform" onclick="openServerModal('tv', '${dbEp.id}')"><div class="relative w-32 h-20 shrink-0 rounded-xl overflow-hidden shadow-md"><img src="${img}" class="w-full h-full object-cover"><div class="absolute inset-0 flex items-center justify-center bg-black/30"><i data-lucide="play-circle" class="w-8 h-8 text-white drop-shadow-md"></i></div></div><div class="flex flex-col justify-center gap-1 flex-1"><h5 class="text-sm font-bold text-white leading-tight line-clamp-2">${dbEp.epNum}. ${title}</h5><div class="flex items-center gap-2 mt-1"><span class="text-xs text-white/50 font-bold">${runtime}</span><div class="flex gap-1">${badges.join('')}</div></div></div></div>`;
+                });
+                list.innerHTML = html; lucide.createIcons();
+            } catch(e) { list.innerHTML = '<p class="text-red-500 text-sm text-center">Erro ao carregar episódios.</p>'; }
+        }
+
+        // Modal Servidor Corrigido
+        window.openServerModal = function(type, epId = null) {
+            const list = document.getElementById('server-list'); let links = []; const title = window.currentDetailContent.title;
+            if (type === 'movie') { links = window.currentDetailContent.movieLinks; } 
+            else { window.currentDetailContent.tvSeasons.forEach(s => { const f = s.episodes.find(e => e.id === epId); if(f) links = [f]; }); }
+            if(!links || links.length === 0) { showToast("Nenhum link disponível.", "error"); return; }
+
+            list.innerHTML = links.map((l, i) => {
+                let name = i === 0 ? "Servidor Principal" : `Servidor Alternativo ${i}`; if(l.sub) name = "Legendado";
+                if(l.redirect) {
+                    return `<a href="${l.url}" target="_blank" rel="noopener noreferrer" onclick="closeOverlay()" class="w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl flex items-center justify-between transition-all active:scale-95 text-white font-bold"><div class="flex items-center gap-3"><i data-lucide="external-link" class="w-5 h-5 text-[#33b5e5]"></i> <span>${name}</span></div> <i data-lucide="chevron-right" class="w-4 h-4 text-white/50"></i></a>`;
+                } else {
+                    return `<button type="button" onclick="handleServerAction('${l.url}', '${title}', '${type}', '${epId}', false)" class="w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl flex items-center justify-between transition-all active:scale-95 text-white font-bold"><div class="flex items-center gap-3"><i data-lucide="play-circle" class="w-5 h-5 text-[#E40303]"></i> <span>${name}</span></div></button>`;
+                }
+            }).join('');
+            openOverlay('server-modal'); lucide.createIcons();
+        }
+
+        // NOVA FUNÇÃO: Gerencia o conflito de pilha entre as janelas
+        window.handleServerAction = function(url, title, type, epId, isRedirect) {
+            closeOverlay(); // 1. Fecha o modal de servidor primeiro
+            if(isRedirect) {
+                window.open(url, '_blank');
+            } else {
+                // 2. Aguarda um pequeno delay para a fila do JS processar, então abre o player em segurança
+                setTimeout(() => { openPlayer(url, title, type, epId); }, 100);
+            }
+        }
+
+        // Logica Player
+        window.openPlayer = function(url, title, type, epId = null) {
+            const video = document.getElementById('main-video-player');
+            const iframe = document.getElementById('main-iframe-player');
+            document.getElementById('player-title').innerText = title;
+            openOverlay('player-view');
+            
+            if(playerHls) { playerHls.destroy(); playerHls = null; }
+            video.pause(); video.src = ''; iframe.src = '';
+            
+            const isHLS = url.includes('.m3u8') || url.includes('m3u8');
+            const isMP4 = url.includes('.mp4');
+
+            if (isHLS || isMP4) {
+                iframe.classList.add('hidden'); video.classList.remove('hidden');
+                if (isHLS && Hls.isSupported()) {
+                    playerHls = new Hls(); playerHls.loadSource(url); playerHls.attachMedia(video);
+                    playerHls.on(Hls.Events.MANIFEST_PARSED, function() { video.play().catch(e=>console.log(e)); });
+                } else {
+                    video.src = url; video.play().catch(e=>console.log(e));
+                }
+            } else {
+                video.classList.add('hidden'); iframe.classList.remove('hidden');
+                iframe.src = url;
+            }
+
+            const tvControls = document.getElementById('player-tv-controls');
+            if (type === 'tv') {
+                tvControls.classList.remove('hidden'); tvControls.classList.add('flex'); let options = '';
+                window.currentDetailContent.tvSeasons.forEach(s => { s.episodes.sort((a,b)=>a.epNum - b.epNum).forEach(e => { options += `<option value="${e.id}" ${e.id === epId ? 'selected' : ''} class="text-black">T${s.seasonNum} - Ep ${e.epNum}</option>`; }); });
+                document.getElementById('player-ep-select').innerHTML = options;
+            } else { tvControls.classList.add('hidden'); tvControls.classList.remove('flex'); }
+        }
+        window.closePlayerLogic = function() {
+            const video = document.getElementById('main-video-player');
+            const iframe = document.getElementById('main-iframe-player');
+            video.pause(); video.src = ''; iframe.src = '';
+            if(playerHls) { playerHls.destroy(); playerHls = null; }
+        }
+        window.changePlayerEpisode = function(epId) {
+            let nUrl = ''; window.currentDetailContent.tvSeasons.forEach(s => { const f = s.episodes.find(e => e.id === epId); if(f) nUrl = f.url; });
+            if(nUrl) { window.openPlayer(nUrl, window.currentDetailContent.title, 'tv', epId); }
+        }
+
+        window.openFullGrid = function(title, dataArray) {
+            document.getElementById('full-grid-title').innerText = title; const container = document.getElementById('full-grid-container');
+            container.innerHTML = dataArray.map(c => `<img src="${c.posterUrl}" loading="lazy" decoding="async" onclick="closeOverlay(); openDetails('${c.id}');" class="w-full aspect-[2/3] object-cover rounded-lg shadow-md cursor-pointer active:scale-95 transition-transform border border-white/10" alt="Poster">`).join('');
+            openOverlay('full-grid-view');
+        }
+
+        // EXPLORAR
+        let explorePage = 1; const ITEMS_PER_PAGE = 24;
+        function normalizeString(str) { return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+
+        window.initExploreFilters = function() { const yearSelect = document.getElementById('explore-year'); const currentYear = new Date().getFullYear(); let html = '<option value="" class="text-black">Anos</option>'; for(let y = currentYear; y >= 1900; y--) { html += `<option value="${y}" class="text-black">${y}</option>`; } yearSelect.innerHTML = html; }
+        window.initExploreFilters();
+
+        window.resetExploreFilters = function() { document.getElementById('explore-search').value = ''; document.getElementById('explore-year').value = ''; document.getElementById('explore-streaming').value = ''; resetPageAndRender(); }
+        window.resetPageAndRender = function() { explorePage = 1; renderExploreGrid(); }
+
+        window.renderExploreGrid = async function() {
+            const query = normalizeString(document.getElementById('explore-search').value);
+            const yearFilter = document.getElementById('explore-year').value;
+            const streamFilter = document.getElementById('explore-streaming').value;
+            
+            let filtered = window.allContentData.filter(c => c.status === 'published');
+            if (query) { filtered = filtered.filter(c => { const t = normalizeString(c.title); const o = normalizeString(c.originalTitle || ''); return t.includes(query) || o.includes(query); }); }
+            if (yearFilter) { filtered = filtered.filter(c => c.date && c.date.startsWith(yearFilter)); }
+
+            if (streamFilter) {
+                const grid = document.getElementById('explore-grid'); grid.innerHTML = '<div class="col-span-5 flex justify-center py-10"><svg class="w-8 h-8 animate-spin fill-[#FFFF00]" viewBox="0 0 24 24"><path d="M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"/></svg></div>';
+                let streamFiltered = [];
+                for(let i=0; i<filtered.length; i++) {
+                    const c = filtered[i];
+                    if(!c.providersFetched) {
+                        try { const res = await fetch(`https://api.themoviedb.org/3/${c.mediaType}/${c.tmdbId}/watch/providers?api_key=${TMDB_KEY}`); const data = await res.json(); c.providers = (data.results && data.results.BR && data.results.BR.flatrate) ? data.results.BR.flatrate.map(p => p.provider_name) : []; c.providersFetched = true; } catch(e) { c.providers = []; c.providersFetched = true; }
+                    }
+                    if(c.providers.includes(streamFilter)) streamFiltered.push(c);
+                }
+                filtered = streamFiltered;
+            }
+
+            const totalItems = filtered.length; const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+            if(explorePage > totalPages) explorePage = totalPages;
+            const startIndex = (explorePage - 1) * ITEMS_PER_PAGE; const paginated = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+            const grid = document.getElementById('explore-grid');
+            if (paginated.length === 0) { grid.innerHTML = `<div class="col-span-4 text-center text-white/50 py-10">Nenhum resultado.</div>`; } 
+            else { grid.innerHTML = paginated.map(c => `<img src="${c.posterUrl}" loading="lazy" decoding="async" onclick="openDetails('${c.id}')" class="w-full aspect-[2/3] object-cover rounded-lg shadow-md cursor-pointer active:scale-95 transition-transform border border-white/10">`).join(''); }
+
+            const pagContainer = document.getElementById('explore-pagination');
+            if (totalPages <= 1) { pagContainer.innerHTML = ''; }
+            else {
+                let pHTML = `<button onclick="changePage(${explorePage-1})" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shadow-lg ${explorePage === 1 ? 'opacity-30 pointer-events-none' : 'active:scale-95'}"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>`;
+                pHTML += `<span class="text-sm font-bold mx-2">Página ${explorePage} de ${totalPages}</span>`;
+                pHTML += `<button onclick="changePage(${explorePage+1})" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shadow-lg ${explorePage === totalPages ? 'opacity-30 pointer-events-none' : 'active:scale-95'}"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>`;
+                pagContainer.innerHTML = pHTML; lucide.createIcons();
+            }
+        }
+        window.changePage = function(newPage) { explorePage = newPage; renderExploreGrid(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyAqNjGO6kuWredy5Lxmsn-VqcMiElwLcNU", authDomain: "queerflix-786c8.firebaseapp.com", projectId: "queerflix-786c8", storageBucket: "queerflix-786c8.firebasestorage.app", messagingSenderId: "114191841837", appId: "1:114191841837:web:84f382132847409697d6a4" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app); const contentCollection = collection(db, 'content');
+
+        const authLoading = document.getElementById('auth-loading'); const formLogin = document.getElementById('form-login'); const formSignup = document.getElementById('form-signup'); const userProfileView = document.getElementById('user-profile-view');
+        const adminBtn = document.getElementById('btn-admin-panel'); const ADMIN_UID = "bdaCpHeqtDffEhZ2rJT8wSHeXOp2";
+
+        window.allContentData = []; window.isUserLoggedIn = false;
+
+        
+
+        onSnapshot(contentCollection, (snapshot) => {
+            window.allContentData = []; snapshot.forEach(doc => { window.allContentData.push({ id: doc.id, ...doc.data() }); }); window.allContentData.sort((a,b) => b.timestamp - a.timestamp); 
+            const publishedItems = window.allContentData.filter(c => c.status === 'published');
+            window.renderDynamicHome(publishedItems); window.renderExploreGrid();
+            if(document.getElementById('admin-edit-list').classList.contains('active')) { window.renderEditListUI(); }
+            const urlParams = new URLSearchParams(window.location.search); const deepId = urlParams.get('id');
+            if(deepId && !window.activeOverlays.includes('details-view') && !window.deepLinkProcessed) { window.deepLinkProcessed = true; setTimeout(() => window.openDetails(deepId), 600); }
+        });
+
+        window.carouselDataMap = window.carouselDataMap || {};
+        
+        window.renderMyListCarousel = function() {
+            const publishedItems = window.allContentData.filter(c => c.status === 'published');
+            window.renderDynamicHome(publishedItems);
+        }
+
+        // MOTOR DINÂMICO DE CARROSSÉIS
+        window.renderDynamicHome = function(published) {
+            const container = document.getElementById('dynamic-home-carousels');
+            if(!container) return;
+            let html = '';
+
+            const buildCarousel = (title, items, badgeFunc = null) => {
+                if(!items || items.length === 0) return '';
+                window.carouselDataMap[title] = items;
+                let cards = items.map(c => {
+                    let badge = badgeFunc ? badgeFunc(c) : '';
+                    return `<div class="relative shrink-0 w-[21vw] max-w-[105px] cursor-pointer active:scale-95 transition-transform" onclick="openDetails('${c.id}')">
+                        <img src="${c.posterUrl}" loading="lazy" decoding="async" class="w-full aspect-[2/3] object-cover rounded-lg shadow-md border border-white/10">
+                        ${badge}
+                    </div>`;
+                }).join('');
+                return `<div class="flex flex-col w-full"><div class="flex items-center justify-between px-6 mb-2"><h2 class="text-[1.1rem] font-black txt-dyn drop-shadow-md flex-1 uppercase tracking-wider">${title}</h2><button type="button" onclick="openFullGrid('${title}', window.carouselDataMap['${title}'])" class="p-3 -mr-2 active:scale-95 transition-transform touch-manipulation"><i data-lucide="chevron-right" class="w-6 h-6 txt-dyn drop-shadow-md pointer-events-none"></i></button></div><div class="flex gap-3 overflow-x-auto px-6 pb-2 pt-1 snap-x snap-mandatory no-scrollbar">${cards}</div></div>`;
+            };
+
+            // 1. Minha Lista
+            if(window.isUserLoggedIn && window.myListItems && window.myListItems.length > 0) {
+                html += buildCarousel('Minha Lista', getMyListContent());
+            }
+
+            // 2. Lançamentos Recentes
+            html += buildCarousel('Lançamentos Recentes', published.slice(0, 15));
+
+            // 3. Séries
+            const series = published.filter(c => c.mediaType === 'tv');
+            html += buildCarousel('Séries', series.slice(0, 15));
+
+            // 4. Novos Episódios (Com Badge Dinâmico)
+            const novosEps = series.filter(c => c.tvSeasons && c.tvSeasons.length > 0).slice(0, 15);
+            html += buildCarousel('Novos Episódios', novosEps, (c) => {
+                let lastS = c.tvSeasons[c.tvSeasons.length - 1];
+                if(!lastS || !lastS.episodes || lastS.episodes.length === 0) return '';
+                let lastE = lastS.episodes[lastS.episodes.length - 1];
+                return `<span class="absolute top-2 right-2 bg-red-600 text-white text-[0.65rem] font-black px-2 py-0.5 rounded shadow-md border border-red-500/50">T${lastS.seasonNum}E${lastE.epNum}</span>`;
+            });
+
+            // 5. Lançamentos do Ano Atual
+            const currentYear = new Date().getFullYear().toString();
+            const doAno = published.filter(c => c.date && c.date.startsWith(currentYear));
+            html += buildCarousel(`Lançamentos ${currentYear}`, doAno.slice(0, 15));
+
+            // 6. Temáticos por Dia (Muda automaticamente)
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const themeTitles = ["Romance para chorar", "Noite de Terror", "Rir até doer a barriga", "Ação Explosiva", "Sci-Fi e Mistério", "Para a Família Toda"];
+            const themeGenres = ["Romance", "Terror", "Comédia", "Ação", "Ficção", "Família"];
+            
+            const themeIdx1 = dayOfYear % themeTitles.length;
+            const themeIdx2 = (dayOfYear + 3) % themeTitles.length;
+            
+            const theme1Content = published.filter(c => c.genres && c.genres.toLowerCase().includes(themeGenres[themeIdx1].toLowerCase()));
+            const theme2Content = published.filter(c => c.genres && c.genres.toLowerCase().includes(themeGenres[themeIdx2].toLowerCase()));
+
+            if(theme1Content.length > 0) html += buildCarousel(themeTitles[themeIdx1], theme1Content);
+            if(theme2Content.length > 0) html += buildCarousel(themeTitles[themeIdx2], theme2Content);
+
+            // 7. Detecção Automática de Gêneros Existentes
+            let allGenres = new Set();
+            published.forEach(c => { if(c.genres) c.genres.split(',').forEach(g => allGenres.add(g.trim())); });
+            let randomGenres = Array.from(allGenres).sort(() => 0.5 - Math.random()).slice(0, 4); // Pega 4 aleatórios
+            
+            randomGenres.forEach(genre => {
+                const genreItems = published.filter(c => c.genres && c.genres.includes(genre));
+                if(genreItems.length > 0 && !themeGenres.includes(genre)) { html += buildCarousel(genre, genreItems); }
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+window.renderTop10Carousel = function() {
+            const container = document.getElementById('top10-carousel');
+            const section = document.getElementById('top10-section');
+            if(!container || !section) return;
+            let topItems = window.allContentData.filter(c => c.status === 'published' && c.views > 0).sort((a,b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
+            if(topItems.length === 0) { section.classList.add('hidden'); section.classList.remove('flex'); return; }
+            section.classList.remove('hidden'); section.classList.add('flex');
+            container.innerHTML = topItems.map((c, i) => `
+                <div class="relative flex items-center shrink-0 w-[140px] cursor-pointer active:scale-95 transition-transform" onclick="openDetails('${c.id}')">
+                    <span class="top10-number absolute left-[-20px] bottom-[-10px] z-[1]">${i + 1}</span>
+                    <img src="${c.posterUrl}" class="w-[110px] aspect-[2/3] object-cover rounded-xl shadow-lg relative z-10 ml-8 border border-white/10">
+                </div>
+            `).join('');
+        }
+
+        window.renderEditListUI = function() {
+            const query = document.getElementById('admin-local-search').value.toLowerCase(); const container = document.getElementById('edit-content-container'); const filtered = window.allContentData.filter(c => c.title.toLowerCase().includes(query));
+            if(filtered.length === 0) { container.innerHTML = `<p class="text-center text-white/50 py-4">Nenhum conteúdo encontrado.</p>`; return; }
+            container.innerHTML = filtered.map(c => {
+                const isDraft = c.status === 'draft'; const badge = isDraft ? `<span class="bg-yellow-500/20 text-yellow-500 border border-yellow-500/50 px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-widest">Rascunho</span>` : `<span class="bg-green-500/20 text-green-500 border border-green-500/50 px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase tracking-widest">Publicado</span>`;
+                return `<div class="bg-[#111] border border-white/10 rounded-2xl p-4 flex gap-4 items-center"><img src="${c.posterUrl}" class="w-16 h-24 object-cover rounded-lg shadow-md shrink-0"><div class="flex flex-col flex-1"><div class="flex items-center justify-between mb-1"><span class="text-[0.7rem] font-bold text-white/50 uppercase tracking-widest">${c.mediaType === 'movie' ? 'Filme' : 'Série'}</span>${badge}</div><h4 class="font-black text-white text-base leading-tight line-clamp-1 mb-3">${c.title}</h4><div class="flex gap-2"><button onclick="toggleDraftStatus('${c.id}', '${c.status}')" class="flex-1 py-1.5 rounded-lg font-bold text-[0.8rem] transition-colors ${isDraft ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'}">${isDraft ? 'Publicar' : 'Rascunho'}</button><button onclick="editContent('${c.id}')" class="flex-1 bg-white/10 hover:bg-white/20 py-1.5 rounded-lg text-white font-bold text-[0.8rem] transition-colors">Editar</button><button onclick="openDeleteModal('${c.id}')" class="w-10 bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center rounded-lg transition-colors"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div></div></div>`;
+            }).join(''); lucide.createIcons();
+        }
+
+        window.renderEditList = function() { window.renderEditListUI(); }
+        window.toggleDraftStatus = async function(id, currentStatus) { const newStatus = currentStatus === 'published' ? 'draft' : 'published'; try { await updateDoc(doc(db, "content", id), { status: newStatus }); window.showToast(`Movido para ${newStatus === 'published' ? 'Publicados' : 'Rascunhos'}.`, 'success'); } catch(e) { window.showToast('Erro ao atualizar.', 'error'); } }
+        window.editContent = function(id) { const data = window.allContentData.find(c => c.id === id); if(!data) return; window.publishState = JSON.parse(JSON.stringify(data)); window.openPublishForm(true); window.populatePublishForm(); }
+        window.confirmPublish = async function() { const btn = document.getElementById('btn-confirm-save-db'); btn.classList.add('btn-loading'); btn.disabled = true; try { const dataToSave = { tmdbId: window.publishState.tmdbId || '', mediaType: window.publishState.mediaType || 'movie', title: window.publishState.title || '', originalTitle: window.publishState.originalTitle || '', posterUrl: window.publishState.posterUrl || '', synopsis: window.publishState.synopsis || '', genres: window.publishState.genres || '', actors: window.publishState.actors || '', date: window.publishState.date || '', status: window.publishState.status || 'published', movieLinks: window.publishState.movieLinks || [], tvSeasons: window.publishState.tvSeasons || [], timestamp: (window.publishState.id && window.publishState.timestamp) ? window.publishState.timestamp : Date.now() }; if (window.publishState.id) { await updateDoc(doc(db, "content", window.publishState.id), dataToSave); window.showToast('Conteúdo editado com sucesso!', 'success'); } else { await setDoc(doc(contentCollection), dataToSave); window.showToast('Conteúdo publicado no catálogo!', 'success'); } window.closePublishPreview(); window.closePublishForm(); if(document.getElementById('admin-edit-list').classList.contains('active')) { window.closeEditList(); } } catch(e) { window.showToast('Erro ao salvar no banco. Verifique os campos!', 'error'); console.log(e); } finally { btn.classList.remove('btn-loading'); btn.disabled = false; } }
+        let isDeletingActive = false;
+        window.executeDelete = async function() { 
+            if(!window.deleteTargetId || isDeletingActive) return; 
+            isDeletingActive = true;
+            const btn = document.getElementById('btn-delete-final'); 
+            btn.innerText = 'Apagando...'; 
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            
+            try { 
+                // UI Otimista: Remove o item visualmente para não travar a tela esperando o banco
+                const itemVisual = document.querySelector(`button[onclick="openDeleteModal('${window.deleteTargetId}')"]`)?.closest('.bg-\\[\\#111\\]');
+                if(itemVisual) itemVisual.remove();
+                
+                window.closeDeleteModal(); 
+                await deleteDoc(doc(db, "content", window.deleteTargetId)); 
+                window.showToast('Excluído definitivamente.', 'success'); 
+            } catch(e) { 
+                window.showToast('Erro ao excluir.', 'error'); 
+            } finally { 
+                btn.innerText = 'Apagar'; 
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                isDeletingActive = false;
+                window.deleteTargetId = null;
+            } 
+        }
+
+        const translateError = (c) => { if(c === 'auth/invalid-credential') return 'E-mail ou senha incorretos.'; if(c === 'auth/email-already-in-use') return 'Este e-mail já está cadastrado.'; if(c === 'auth/weak-password') return 'A senha deve ter pelo menos 6 caracteres.'; return 'Ocorreu um erro. Tente novamente.'; };
+
+        function renderUserProfile(user) {
+            document.getElementById('profile-name').innerText = user.displayName || 'Sem Nome'; document.getElementById('profile-uid').innerText = user.uid; document.getElementById('profile-pic').src = user.photoURL || 'https://i.ibb.co/v4gR3Yn/default-avatar.png';
+            if(user.uid === ADMIN_UID) { adminBtn.classList.remove('hidden'); adminBtn.classList.add('flex'); } else { adminBtn.classList.add('hidden'); adminBtn.classList.remove('flex'); }
+            authLoading.classList.add('hidden'); formLogin.classList.add('hidden'); formSignup.classList.add('hidden'); userProfileView.classList.remove('hidden'); userProfileView.classList.add('tab-enter');
+        }
+
+        onAuthStateChanged(auth, (user) => { 
+            window.isUserLoggedIn = !!user;
+            if (user) { renderUserProfile(user); window.renderMyListCarousel(); } else { authLoading.classList.add('hidden'); userProfileView.classList.add('hidden'); formSignup.classList.add('hidden'); formLogin.classList.remove('hidden'); formLogin.classList.add('tab-enter'); window.renderMyListCarousel(); } 
+        });
+
+        window.editSelectedFile = null;
+        window.openEditProfileModal = function() {
+            const user = auth.currentUser;
+            if(!user) return;
+            document.getElementById('edit-name').value = user.displayName || '';
+            document.getElementById('edit-photo-preview').src = user.photoURL || 'https://i.ibb.co/v4gR3Yn/default-avatar.png';
+            window.editSelectedFile = null;
+            window.openOverlay('edit-profile-modal');
+        }
+        window.closeEditProfileModal = function() { window.closeOverlay(); }
+        window.handleEditPhotoSelect = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                window.editSelectedFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) { document.getElementById('edit-photo-preview').src = e.target.result; };
+                reader.readAsDataURL(file);
+            }
+        }
+        window.saveEditProfile = async function() {
+            const user = auth.currentUser;
+            if(!user) return;
+            const newName = document.getElementById('edit-name').value.trim();
+            if(!newName) return window.showToast('O nome não pode ser vazio.', 'error');
+            
+            const btn = document.getElementById('btn-save-profile');
+            const spinner = document.getElementById('edit-photo-spinner');
+            btn.classList.add('btn-loading'); btn.disabled = true;
+            if(window.editSelectedFile) { spinner.classList.remove('hidden'); spinner.classList.add('flex'); }
+            
+            try {
+                let newPhotoUrl = user.photoURL;
+                if (window.editSelectedFile) {
+                    const uploadedUrl = await window.uploadToImgBB(window.editSelectedFile);
+                    if (uploadedUrl) newPhotoUrl = uploadedUrl;
+                }
+                await updateProfile(user, { displayName: newName, photoURL: newPhotoUrl });
+                renderUserProfile(user);
+                window.showToast('Perfil atualizado!', 'success');
+                window.closeEditProfileModal();
+            } catch (err) {
+                window.showToast('Erro ao atualizar perfil.', 'error');
+            } finally {
+                btn.classList.remove('btn-loading'); btn.disabled = false;
+                spinner.classList.add('hidden'); spinner.classList.remove('flex');
+            }
+        }
+
+        document.getElementById('form-login').addEventListener('submit', async (e) => { e.preventDefault(); const btn = document.getElementById('btn-login'); btn.classList.add('btn-loading'); btn.disabled = true; try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-password').value); window.showToast('Bem-vindo de volta!', 'success'); e.target.reset(); } catch (err) { window.showToast(translateError(err.code), 'error'); } finally { btn.classList.remove('btn-loading'); btn.disabled = false; } });
+        document.getElementById('form-signup').addEventListener('submit', async (e) => { e.preventDefault(); const name = document.getElementById('signup-name').value; const btn = document.getElementById('btn-signup'); const spinner = document.getElementById('photo-spinner'); if (!window.selectedFile) { window.showToast('Por favor, escolha uma foto.', 'error'); return; } btn.classList.add('btn-loading'); btn.disabled = true; spinner.classList.remove('hidden'); spinner.classList.add('flex'); try { const photoUrl = await window.uploadToImgBB(window.selectedFile); if (!photoUrl) throw new Error('Falha no upload da foto'); const userCredential = await createUserWithEmailAndPassword(auth, document.getElementById('signup-email').value, document.getElementById('signup-password').value); await updateProfile(userCredential.user, { displayName: name, photoURL: photoUrl }); renderUserProfile(auth.currentUser); window.showToast('Conta criada com sucesso!', 'success'); e.target.reset(); window.selectedFile = null; document.getElementById('photo-preview').style.display = 'none'; document.getElementById('camera-icon').style.display = 'block'; document.getElementById('photo-container').style.borderStyle = 'dashed'; } catch (err) { window.showToast(err.code ? translateError(err.code) : err.message, 'error'); } finally { btn.classList.remove('btn-loading'); btn.disabled = false; spinner.classList.add('hidden'); spinner.classList.remove('flex'); } });
+        window.confirmLogout = function() { signOut(auth).then(() => { window.myListItems = []; localStorage.removeItem('queerflix-list'); window.renderMyListCarousel(); if(window.currentDetailContent) window.updateDetailsListIcon(window.currentDetailContent.id); window.closeLogoutModal(); window.showToast('Você saiu da conta.', 'success'); }).catch(() => { window.closeLogoutModal(); window.showToast('Erro ao sair.', 'error'); }); }
+    </script>
+</body>
+</html>
