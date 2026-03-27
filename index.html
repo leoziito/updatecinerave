@@ -600,33 +600,46 @@
         window.activeOverlays = [];
 
         window.openOverlay = function(overlayId, params = {}) {
-            const el = document.getElementById(overlayId); if(!el) return;
-            el.classList.remove('hidden'); setTimeout(() => { el.classList.add('active'); }, 10);
-            window.activeOverlays.push(overlayId);
-            document.body.style.overflow = 'hidden'; // Bloqueia deslize fantasma
-            try {
-                const searchParams = new URLSearchParams(window.location.search);
-                if(params.id) searchParams.set('id', params.id); else searchParams.set('view', overlayId);
-                const newUrl = `${window.location.pathname}?${searchParams.toString()}`; history.pushState({ overlayId }, '', newUrl);
-            } catch (e) { console.warn('History API bloqueada no preview.'); }
-        }
+            const el = document.getElementById(overlayId); if(!el) return;
+            el.classList.remove('hidden'); setTimeout(() => { el.classList.add('active'); }, 10);
+            if(window.activeOverlays.length === 0) {
+                document.body.dataset.scrollY = window.scrollY;
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${window.scrollY}px`;
+                document.body.style.width = '100%';
+                document.body.style.overflow = 'hidden';
+            }
+            window.activeOverlays.push(overlayId);
+            try {
+                const searchParams = new URLSearchParams(window.location.search);
+                if(params.id) searchParams.set('id', params.id); else searchParams.set('view', overlayId);
+                const newUrl = `${window.location.pathname}?${searchParams.toString()}`; history.pushState({ overlayId }, '', newUrl);
+            } catch (e) { console.warn('History API bloqueada no preview.'); }
+        }
 
-        window.closeOverlay = function(fromHistory = false) {
-            if(window.activeOverlays.length === 0) return;
-            const overlayId = window.activeOverlays.pop(); const el = document.getElementById(overlayId);
-            if(window.activeOverlays.length === 0) document.body.style.overflow = ''; // Libera deslize fantasma
-            if(el) { 
-                el.classList.remove('active'); 
-                if(overlayId === 'player-view') closePlayerLogic();
-                setTimeout(() => { if(overlayId === 'admin-publish') closePublishForm(); }, 400); 
-            }
-            if(!fromHistory) {
-                try {
-                    const searchParams = new URLSearchParams(window.location.search); searchParams.delete('id'); searchParams.delete('view');
-                    const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname; history.replaceState({}, '', newUrl);
-                } catch (e) {}
-            }
-        }
+        window.closeOverlay = function(fromHistory = false) {
+            if(window.activeOverlays.length === 0) return;
+            const overlayId = window.activeOverlays.pop(); const el = document.getElementById(overlayId);
+            if(window.activeOverlays.length === 0) {
+                const scrollY = document.body.dataset.scrollY;
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
+                document.body.style.overflow = '';
+                window.scrollTo(0, parseInt(scrollY || '0'));
+            }
+            if(el) { 
+                el.classList.remove('active'); 
+                if(overlayId === 'player-view') closePlayerLogic();
+                setTimeout(() => { if(overlayId === 'admin-publish') closePublishForm(); }, 400); 
+            }
+            if(!fromHistory) {
+                try {
+                    const searchParams = new URLSearchParams(window.location.search); searchParams.delete('id'); searchParams.delete('view');
+                    const newUrl = searchParams.toString() ? `${window.location.pathname}?${searchParams.toString()}` : window.location.pathname; history.replaceState({}, '', newUrl);
+                } catch (e) {}
+            }
+        }
 
         window.addEventListener('popstate', (e) => { if (window.activeOverlays.length > 0) { window.closeOverlay(true); } });
 
@@ -882,11 +895,15 @@
         }
 
         window.currentDetailContent = null; window.currentTMDBDetails = null;
+        window.tmdbCache = window.tmdbCache || {}; // Instancia o Cache
 
         window.openDetails = async function(contentId) {
             const content = window.allContentData.find(c => c.id === contentId); if(!content) return;
             window.currentDetailContent = content; window.updateDetailsListIcon(contentId);
-            if(window.trackContentView) window.trackContentView(contentId);
+            
+            // CORREÇÃO: Atrasa o registro de view no firebase em 1.5s para não travar a animação de abertura da página
+            if(window.trackContentView) setTimeout(() => window.trackContentView(contentId), 1500);
+            
             openOverlay('details-view', { id: contentId });
             
             const scrollArea = document.getElementById('details-content-scroll'); const loader = document.getElementById('details-loading');
@@ -896,8 +913,17 @@
             document.getElementById('det-btn-watch').classList.add('hidden'); document.getElementById('det-tv-section').classList.add('hidden'); document.getElementById('det-tv-section').classList.remove('flex'); 
 
             try {
-                const res = await fetch(`https://api.themoviedb.org/3/${content.mediaType}/${content.tmdbId}?api_key=${TMDB_KEY}&language=pt-BR&append_to_response=credits,release_dates,content_ratings`);
-                const tmdbData = await res.json(); window.currentTMDBDetails = tmdbData;
+                // CORREÇÃO: Utiliza o cache para acesso instantâneo se já tiver consultado esse filme/série antes
+                let tmdbData;
+                if(window.tmdbCache[content.tmdbId]) {
+                    tmdbData = window.tmdbCache[content.tmdbId];
+                } else {
+                    const res = await fetch(`https://api.themoviedb.org/3/${content.mediaType}/${content.tmdbId}?api_key=${TMDB_KEY}&language=pt-BR&append_to_response=credits,release_dates,content_ratings`);
+                    tmdbData = await res.json();
+                    window.tmdbCache[content.tmdbId] = tmdbData;
+                }
+
+                window.currentTMDBDetails = tmdbData;
 
                 let ageRating = 'L';
                 if (content.mediaType === 'movie' && tmdbData.release_dates && tmdbData.release_dates.results) { const br = tmdbData.release_dates.results.find(r => r.iso_3166_1 === 'BR'); if (br && br.release_dates[0].certification) ageRating = br.release_dates[0].certification; } 
@@ -940,7 +966,7 @@
             } catch(e) { list.innerHTML = '<p class="text-red-500 text-sm text-center">Erro ao carregar episódios.</p>'; }
         }
 
-        // Modal Servidor
+        // Modal Servidor Corrigido
         window.openServerModal = function(type, epId = null) {
             const list = document.getElementById('server-list'); let links = []; const title = window.currentDetailContent.title;
             if (type === 'movie') { links = window.currentDetailContent.movieLinks; } 
@@ -948,11 +974,23 @@
             if(!links || links.length === 0) { showToast("Nenhum link disponível.", "error"); return; }
 
             list.innerHTML = links.map((l, i) => {
-                let name = i === 0 ? "Servidor Principal" : `Servidor Alternativo ${i}`; if(l.sub) name += " (Legendado)";
-                const action = l.redirect ? `window.open('${l.url}', '_blank')` : `openPlayer('${l.url}', '${title}', '${type}', '${epId}')`;
-                return `<button onclick="${action}; closeOverlay('server-modal')" class="w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl flex items-center justify-between transition-all active:scale-95 text-white font-bold"><div class="flex items-center gap-3"><i data-lucide="play-circle" class="w-5 h-5 text-[#E40303]"></i> <span>${name}</span></div> ${l.redirect ? '<i data-lucide="external-link" class="w-4 h-4 text-white/50"></i>' : ''}</button>`;
+                let name = i === 0 ? "Servidor Principal" : `Servidor Alternativo ${i}`; if(l.sub) name = "Legendado";
+                const redirectFlag = l.redirect ? 'true' : 'false';
+                // Correção: Agora usa uma função segura para navegar
+                return `<button onclick="handleServerAction('${l.url}', '${title}', '${type}', '${epId}', ${redirectFlag})" class="w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-xl flex items-center justify-between transition-all active:scale-95 text-white font-bold"><div class="flex items-center gap-3"><i data-lucide="play-circle" class="w-5 h-5 text-[#E40303]"></i> <span>${name}</span></div> ${l.redirect ? '<i data-lucide="external-link" class="w-4 h-4 text-white/50"></i>' : ''}</button>`;
             }).join('');
             openOverlay('server-modal'); lucide.createIcons();
+        }
+
+        // NOVA FUNÇÃO: Gerencia o conflito de pilha entre as janelas
+        window.handleServerAction = function(url, title, type, epId, isRedirect) {
+            closeOverlay(); // 1. Fecha o modal de servidor primeiro
+            if(isRedirect) {
+                window.open(url, '_blank');
+            } else {
+                // 2. Aguarda um pequeno delay para a fila do JS processar, então abre o player em segurança
+                setTimeout(() => { openPlayer(url, title, type, epId); }, 100);
+            }
         }
 
         // Logica Player
