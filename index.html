@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CINERAVE+ | Filmes e Séries</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .scroll-smooth-ios { -webkit-overflow-scrolling: touch; }
+
+        .banner-gradient { background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0) 100%); }
+        .modal-gradient { background: linear-gradient(to top, rgba(10, 10, 10, 1) 5%, rgba(10, 10, 10, 0.9) 30%, rgba(10, 10, 10, 0) 100%); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .animate-modal { animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes popIn { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .animate-pop { animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .poster-card { transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); transform-origin: center bottom; }
+        .poster-card:hover { transform: scale(1.08) translateY(-5px); box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.3); z-index: 20; }
+        
+        select option { background-color: #000; color: #fff; }
+    </style>
+</head>
+<body class="bg-black text-white font-sans antialiased overflow-x-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- Cabeçalho -->
+    <header class="fixed top-0 w-full z-40 bg-gradient-to-b from-black via-black/80 to-transparent p-4 transition-all duration-300 pointer-events-none" id="header">
+        <div class="max-w-7xl mx-auto flex items-center justify-center md:justify-start pointer-events-auto">
+            <h1 class="text-3xl font-black text-white tracking-wider drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]">
+                CINERAVE<span class="text-blue-400">+</span>
+            </h1>
+        </div>
+    </header>
+
+    <div id="app" class="pb-24"> 
+        
+        <!-- ABA: HOME -->
+        <main id="view-home" class="block w-full transition-opacity duration-300">
+            <!-- Banner Rotativo -->
+            <div id="banner-container" class="relative w-full h-[70vh] md:h-[85vh] bg-black flex items-end overflow-hidden cursor-pointer group" onclick="handleBannerClick()">
+                <div id="banner-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform scale-105 group-hover:scale-100"></div>
+                <div class="absolute inset-0 banner-gradient transition-opacity duration-500 group-hover:opacity-70"></div>
+                <div class="absolute inset-0 bg-blue-900/5 mix-blend-overlay"></div>
+                
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 bg-black/20">
+                    <div class="w-20 h-20 bg-blue-600/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,99,235,0.8)] transform scale-75 group-hover:scale-100 transition-transform duration-500">
+                        <i class="ph-fill ph-play text-4xl text-white ml-2"></i>
+                    </div>
+                </div>
+
+                <div class="relative z-20 p-6 md:p-16 w-full flex flex-col justify-end items-center md:items-start h-full pointer-events-none pb-12">
+                    <img id="banner-logo" src="" class="max-w-[80%] md:max-w-[40%] max-h-[120px] md:max-h-[200px] object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.9)] opacity-0 transition-transform duration-500 group-hover:-translate-y-2" alt="Logo">
+                </div>
+
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-1.5 z-20 pointer-events-none" id="banner-indicators"></div>
+            </div>
+
+            <!-- Listas de Conteúdo Sincronizadas -->
+            <div id="home-rows" class="mt-4 md:mt-8 flex flex-col gap-8 px-4 md:px-12 max-w-[1600px] mx-auto">
+                <div class="w-full flex justify-center py-10" id="home-loading">
+                    <i class="ph ph-circle-notch animate-spin text-4xl text-blue-500"></i>
+                </div>
+            </div>
+        </main>
+
+        <!-- ABA: BUSCA / EXPLORAR -->
+        <main id="view-search" class="hidden w-full min-h-screen pt-24 px-2 md:px-12 max-w-[1600px] mx-auto transition-opacity duration-300">
+            <div class="w-full">
+                <div class="flex flex-col md:flex-row gap-3 mb-6 bg-gray-900/50 p-3 md:p-4 rounded-2xl border border-gray-800 backdrop-blur-sm shadow-xl mx-2 md:mx-0">
+                    <div class="relative flex-1 group">
+                        <i class="ph ph-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400/50 group-focus-within:text-blue-400 text-xl md:text-2xl transition-colors"></i>
+                        <input type="text" id="search-input" placeholder="Pesquise por títulos..." class="w-full bg-black/50 text-white border border-gray-800 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-base md:text-lg shadow-inner placeholder-gray-600">
+                    </div>
+                    
+                    <div class="relative min-w-[140px] md:min-w-[200px]">
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none"><i class="ph ph-funnel text-blue-400"></i></div>
+                        <select id="search-filter" class="w-full h-full min-h-[48px] appearance-none bg-black/50 border border-gray-800 text-white py-3 pl-10 pr-8 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm md:text-lg cursor-pointer font-medium">
+                            <option value="multi">Todos / Geral</option>
+                            <option value="movie">Filmes</option>
+                            <option value="tv">Séries</option>
+                            <option value="dorama">Doramas</option>
+                            <option value="soap">Novelas</option>
+                            <option value="reality">Reality Shows</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none"><i class="ph-bold ph-caret-down text-gray-400"></i></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 mb-4 px-2 md:px-0">
+                    <div class="w-1.5 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                    <h3 id="search-title" class="text-xl md:text-2xl font-bold text-white">Explorar</h3>
+                </div>
+
+                <div id="search-results" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2 md:gap-4 px-2 md:px-0 pb-10"></div>
+                
+                <div id="search-loading" class="hidden py-8 flex justify-center w-full">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="ph ph-circle-notch animate-spin text-4xl text-blue-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+                        <span class="text-blue-400 font-medium tracking-widest text-xs uppercase">A carregar...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MENU INFERIOR -->
+    <nav class="fixed bottom-0 w-full bg-black/95 backdrop-blur-xl border-t border-gray-800 z-40 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <div class="flex justify-around items-center py-2 md:py-4 max-w-lg mx-auto">
+            <button onclick="handleTabClick('home')" id="tab-home" class="flex flex-col items-center gap-1 text-blue-400 transition-all transform hover:scale-110">
+                <div class="relative">
+                    <i class="ph-fill ph-house text-2xl md:text-3xl drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]"></i>
+                    <div id="home-indicator" class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_5px_#60a5fa]"></div>
+                </div>
+                <span class="text-[10px] md:text-xs font-bold tracking-wider mt-1">HOME</span>
+            </button>
+            <button onclick="handleTabClick('search')" id="tab-search" class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-all transform hover:scale-110">
+                <div class="relative">
+                    <i class="ph ph-magnifying-glass text-2xl md:text-3xl"></i>
+                    <div id="search-indicator" class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-400 rounded-full shadow-[0_0_5px_#60a5fa] hidden"></div>
+                </div>
+                <span class="text-[10px] md:text-xs font-bold tracking-wider mt-1">EXPLORAR</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODAL DE DETALHES -->
+    <div id="details-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] hidden overflow-y-auto scroll-smooth-ios flex items-start justify-center p-0 md:p-6 opacity-0 transition-opacity duration-150">
+        <div id="modal-content" class="w-full min-h-screen md:min-h-0 md:max-w-5xl bg-[#0a0a0a] md:rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.9)] relative border-0 md:border border-gray-800/50 flex flex-col transform scale-95 opacity-0 transition-all duration-200 pb-10">
+            
+            <div class="absolute top-4 w-full flex px-4 z-[70] pointer-events-none">
+                <button onclick="navigateBack()" class="pointer-events-auto flex items-center gap-2 text-white bg-black/50 hover:bg-black/70 border border-white/10 backdrop-blur-xl rounded-full px-4 py-2 transition-all shadow-lg active:scale-95 group">
+                    <i class="ph ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">Voltar</span>
+                </button>
+            </div>
+
+            <div id="modal-bg" class="w-full h-[35vh] md:h-96 bg-cover bg-center relative shrink-0">
+                <div class="absolute inset-0 modal-gradient"></div>
+                <div class="absolute inset-0 bg-blue-900/10 mix-blend-overlay"></div>
+            </div>
+            
+            <div class="px-5 md:px-10 relative -mt-20 flex-1">
+                <div class="flex flex-col md:flex-row gap-5 md:gap-8 items-start md:items-end mb-6">
+                    <img id="modal-poster" src="" class="w-28 md:w-48 rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.8)] border border-gray-700 mx-auto md:mx-0" alt="Poster">
+                    
+                    <div class="text-center md:text-left w-full mt-4 md:mt-0">
+                        <h2 id="modal-title" class="text-2xl md:text-5xl font-black mb-2 text-white drop-shadow-md tracking-tight leading-tight">Título</h2>
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3 text-xs md:text-base text-gray-400 font-medium">
+                            <span id="modal-year" class="bg-gray-800 px-2 py-1 rounded text-white shadow-inner">Ano</span>
+                            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+                            <span id="modal-type" class="text-blue-400 uppercase tracking-wider font-bold">Tipo</span>
+                            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+                            <span id="modal-rating" class="flex items-center gap-1 text-yellow-500 font-bold"><i class="ph-fill ph-star"></i> 0.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <p id="modal-overview" class="text-gray-300 text-sm md:text-lg leading-relaxed mb-6 font-light">Sinopse</p>
+                <div id="modal-actions" class="w-full bg-gray-900/50 border border-gray-800 rounded-xl p-4 md:p-6 mb-8 shadow-inner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLAYER OVERLAY -->
+    <div id="player-overlay" class="fixed inset-0 bg-black z-[100] hidden flex-col opacity-0 transition-opacity duration-200">
+        <div class="w-full p-4 absolute top-0 left-0 z-20 pointer-events-none transition-transform transform -translate-y-full duration-200" id="player-header">
+            <button onclick="navigateBack()" class="pointer-events-auto flex items-center gap-2 text-white bg-black/40 hover:bg-black/60 border border-white/10 backdrop-blur-xl rounded-full px-4 py-2 transition-all shadow-lg active:scale-95 group">
+                <i class="ph ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                <span class="text-xs font-bold uppercase tracking-wider">Voltar</span>
+            </button>
+        </div>
+        
+        <div class="w-full h-full flex flex-col items-center justify-center bg-black relative" id="player-container">
+            <div class="absolute inset-0 flex flex-col items-center justify-center z-0 gap-3 pointer-events-none">
+                <i class="ph ph-circle-notch animate-spin text-5xl text-blue-600 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+                <span class="text-blue-500 text-xs tracking-widest uppercase font-bold">A conectar...</span>
+            </div>
+            <iframe id="video-iframe" class="w-full aspect-video max-h-screen md:max-w-7xl md:rounded-xl shadow-[0_0_50px_rgba(0,0,0,1)] bg-black relative z-10" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- FIREBASE INITIALIZATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8ZvnbUXI24eHe1hcQ_jmzs3rw1Wx5yzk",
+            authDomain: "cinexrave.firebaseapp.com",
+            databaseURL: "https://cinexrave-default-rtdb.firebaseio.com",
+            projectId: "cinexrave",
+            storageBucket: "cinexrave.firebasestorage.app",
+            messagingSenderId: "237264799303",
+            appId: "1:237264799303:web:85eb8fb6b42120ca04d362"
+        };
+        const app = initializeApp(firebaseConfig);
+        window.firebaseAuth = getAuth(app);
+        window.firebaseDb = getFirestore(app);
+        window.firebaseRtdb = getDatabase(app);
+    </script>
+
+    <!-- APP SCRIPTS -->
+    <script>
+        const API_KEY = 'd0f7e2c414b1efff7b000ae9b681ed1b';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+        const BG_URL = 'https://image.tmdb.org/t/p/original';
+
+        let appState = { tab: 'home', modalOpen: false, playerOpen: false, playerUrl: '', playerTitle: '' };
+
+        function initHistory() {
+            history.replaceState(appState, '', '');
+            window.addEventListener('popstate', (e) => {
+                if (e.state) applyStateVisuals(e.state);
+                else applyStateVisuals({ tab: 'home', modalOpen: false, playerOpen: false, playerUrl: '', playerTitle: '' });
+            });
+        }
+
+        function navigate(newState) {
+            history.pushState(newState, '', '');
+            applyStateVisuals(newState);
+        }
+
+        function navigateBack() {
+            if (window.history.state !== null && window.history.length > 1) window.history.back(); 
+            else navigate({ tab: appState.tab, modalOpen: false, playerOpen: false, playerUrl: '', playerTitle: '' });
+        }
+
+        function applyStateVisuals(state) {
+            appState = state;
+            renderTabVisuals(state.tab);
+            state.modalOpen ? showModalVisuals() : hideModalVisuals();
+            state.playerOpen ? showPlayerVisuals(state.playerUrl, state.playerTitle) : hidePlayerVisuals();
+        }
+
+        const dataState = {
+            bannerItems: [], bannerIndex: 0, bannerInterval: null,
+            searchPage: 1, searchQuery: '', searchType: 'multi',
+            isSearching: false, hasMoreSearch: true, exploreEndpoint: '', exploreParams: '',
+            currentMediaId: null, currentMediaType: null, currentSeason: 1
+        };
+
+        // FETCH TMDB COM ANTI-CACHE (Garante que novos episódios apareçam em TEMPO REAL)
+        async function fetchTMDB(endpoint, params = '') {
+            try {
+                const noCache = `&_t=${new Date().getTime()}`;
+                const res = await fetch(`${BASE_URL}${endpoint}?api_key=${API_KEY}&language=pt-BR${params}${noCache}`, { cache: 'no-store' });
+                return await res.json();
+            } catch (error) { return { results: [] }; }
+        }
+
+        async function initApp() {
+            initHistory();
+            await loadBanner();
+            loadHomeRows();
+            loadExploreGrid(); 
+        }
+
+        async function loadBanner() {
+            const data = await fetchTMDB('/trending/all/day');
+            if (data.results?.length > 0) {
+                dataState.bannerItems = data.results.slice(0, 10).filter(i => i.backdrop_path);
+                renderBanner(0);
+                startBannerInterval();
+            }
+        }
+
+        function startBannerInterval() {
+            clearInterval(dataState.bannerInterval);
+            dataState.bannerInterval = setInterval(() => {
+                dataState.bannerIndex = (dataState.bannerIndex + 1) % dataState.bannerItems.length;
+                renderBanner(dataState.bannerIndex);
+            }, 6000);
+        }
+
+        async function fetchLogo(id, mediaType) {
+            try {
+                const res = await fetchTMDB(`/${mediaType}/${id}/images`, '&include_image_language=pt,en,null');
+                if (res.logos && res.logos.length > 0) {
+                    const pt = res.logos.find(l => l.iso_639_1 === 'pt');
+                    const en = res.logos.find(l => l.iso_639_1 === 'en');
+                    return (pt || en || res.logos[0]).file_path;
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function renderBanner(index) {
+            const item = dataState.bannerItems[index];
+            if (!item) return;
+
+            const bgEl = document.getElementById('banner-bg');
+            const logoEl = document.getElementById('banner-logo');
+            const indicatorsEl = document.getElementById('banner-indicators');
+
+            bgEl.style.backgroundImage = `url(${BG_URL}${item.backdrop_path})`;
+            logoEl.classList.remove('fade-in'); logoEl.classList.add('opacity-0');
+            
+            if (item.logoPath === undefined) {
+                fetchLogo(item.id, item.media_type || 'movie').then(path => {
+                    item.logoPath = path;
+                    if (dataState.bannerIndex === index) showBannerLogo(path);
+                });
+            } else showBannerLogo(item.logoPath);
+
+            function showBannerLogo(path) {
+                if (path) { logoEl.src = IMG_URL + path; void logoEl.offsetWidth; logoEl.classList.add('fade-in'); } 
+                else logoEl.src = '';
+            }
+
+            indicatorsEl.innerHTML = dataState.bannerItems.map((_, i) => `
+                <div class="h-1.5 rounded-full transition-all duration-300 ${i === index ? 'bg-white w-6 shadow-[0_0_8px_rgba(255,255,255,0.8)]' : 'bg-white/40 w-1.5'}"></div>
+            `).join('');
+        }
+
+        function handleBannerClick() {
+            const item = dataState.bannerItems[dataState.bannerIndex];
+            if (item) handleOpenDetails(item.id, item.media_type || (item.title ? 'movie' : 'tv'));
+        }
+
+        // --- SISTEMA DE ATUALIZAÇÃO AUTOMÁTICA (LÊ OS TXTS DA API) ---
+        async function fetchServerCatalog(filename, tmdbType, limit = 15) {
+            try {
+                // Lê o TXT direto do servidor da API (garantindo sincronia total com o catálogo real)
+                const res = await fetch(`https://redeflixapi.store/${filename}?_t=${Date.now()}`);
+                if (!res.ok) return null;
+                const text = await res.text();
+                // Pega os IDs mais recentes (topo da lista)
+                const ids = text.split('\n').map(id => id.trim()).filter(id => id).slice(0, limit);
+                
+                // Converte IDs em dados visuais do TMDB
+                const promises = ids.map(id => fetchTMDB(`/${tmdbType}/${id}`));
+                const results = await Promise.all(promises);
+                return results.filter(i => i && !i.success === false && i.poster_path);
+            } catch (e) {
+                console.warn(`Fallback ativado para ${filename}`);
+                return null; // Fallback para TMDB normal se o TXT falhar
+            }
+        }
+
+        async function loadHomeRows() {
+            const container = document.getElementById('home-rows');
+            
+            // 1. Tenta carregar exatamente o que foi adicionado no servidor
+            const serverMovies = await fetchServerCatalog('list-movie-ids.txt', 'movie');
+            const serverTv = await fetchServerCatalog('list-tv-ids.txt', 'tv');
+            
+            document.getElementById('home-loading')?.remove(); // Remove spinner
+
+            // Filmes
+            if (serverMovies && serverMovies.length > 0) {
+                container.insertAdjacentHTML('beforeend', buildRow('Adicionados Recentemente (Filmes)', serverMovies, 'movie'));
+            } else {
+                const fData = await fetchTMDB('/movie/now_playing');
+                container.insertAdjacentHTML('beforeend', buildRow('Lançamentos em Filmes', fData.results, 'movie'));
+            }
+
+            // Séries
+            if (serverTv && serverTv.length > 0) {
+                container.insertAdjacentHTML('beforeend', buildRow('Novos Episódios e Séries', serverTv, 'tv'));
+            } else {
+                const sData = await fetchTMDB('/tv/popular');
+                container.insertAdjacentHTML('beforeend', buildRow('Séries em Alta', sData.results, 'tv'));
+            }
+
+            // Categorias fixas atualizadas via TMDB
+            const animes = await fetchTMDB('/discover/tv', '&with_genres=16&with_original_language=ja');
+            if(animes.results) container.insertAdjacentHTML('beforeend', buildRow('Animes Atualizados', animes.results, 'tv'));
+
+            const doramas = await fetchTMDB('/discover/tv', '&with_original_language=ko');
+            if(doramas.results) container.insertAdjacentHTML('beforeend', buildRow('Doramas Recentes', doramas.results, 'tv'));
+        }
+
+        function buildRow(title, items, type) {
+            const cards = items.map(item => `
+                <div class="poster-card flex-none w-[105px] md:w-44 lg:w-52 cursor-pointer relative group rounded-xl overflow-hidden bg-gray-900 border border-gray-800" 
+                     onclick="handleOpenDetails(${item.id}, '${type}')">
+                    <img src="${IMG_URL}${item.poster_path}" alt="${item.title || item.name}" 
+                         class="w-full h-auto object-cover aspect-[2/3] transform group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
+                        <i class="ph-fill ph-play-circle text-3xl md:text-4xl text-blue-500 self-center mb-auto mt-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]"></i>
+                        <span class="text-white text-[10px] md:text-xs font-bold truncate">${item.title || item.name}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="w-full relative z-10">
+                    <div class="flex items-center gap-3 mb-3 md:mb-4">
+                        <div class="w-1.5 h-5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                        <h3 class="text-lg md:text-2xl font-bold text-white tracking-wide">${title}</h3>
+                    </div>
+                    <div class="flex overflow-x-auto gap-3 md:gap-5 pb-4 md:pb-6 hide-scrollbar px-1 scroll-smooth-ios">
+                        ${cards}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ABAS ---
+        function handleTabClick(tabName) {
+            if(appState.tab === tabName && !appState.modalOpen && !appState.playerOpen) return;
+            navigate({ tab: tabName, modalOpen: false, playerOpen: false, playerUrl: '', playerTitle: '' });
+        }
+
+        function renderTabVisuals(tabName) {
+            const views = { home: document.getElementById('view-home'), search: document.getElementById('view-search') };
+            const tabs = { home: document.getElementById('tab-home'), search: document.getElementById('tab-search') };
+            const inds = { home: document.getElementById('home-indicator'), search: document.getElementById('search-indicator') };
+
+            Object.keys(views).forEach(key => {
+                if (key === tabName) {
+                    views[key].classList.remove('hidden'); setTimeout(() => views[key].classList.remove('opacity-0'), 50);
+                    tabs[key].classList.remove('text-gray-500'); tabs[key].classList.add('text-blue-400');
+                    tabs[key].querySelector('i').classList.replace('ph', 'ph-fill'); inds[key].classList.remove('hidden');
+                } else {
+                    views[key].classList.add('opacity-0'); setTimeout(() => views[key].classList.add('hidden'), 300);
+                    tabs[key].classList.remove('text-blue-400'); tabs[key].classList.add('text-gray-500');
+                    tabs[key].querySelector('i').classList.replace('ph-fill', 'ph'); inds[key].classList.add('hidden');
+                }
+            });
+            if(tabName === 'home' && !appState.playerOpen && !appState.modalOpen) startBannerInterval();
+            else clearInterval(dataState.bannerInterval);
+        }
+
+        // --- BUSCA / EXPLORAR ---
+        let searchTimeout;
+        const searchInput = document.getElementById('search-input');
+        const searchFilter = document.getElementById('search-filter');
+        const resultsContainer = document.getElementById('search-results');
+        const searchTitle = document.getElementById('search-title');
+        
+        searchInput.addEventListener('input', handleSearchEvent);
+        searchFilter.addEventListener('change', () => { 
+            dataState.searchType = searchFilter.value; dataState.searchPage = 1;
+            searchInput.value.trim().length > 0 ? performSearch() : loadExploreGrid();
+        });
+
+        function handleSearchEvent() {
+            clearTimeout(searchTimeout);
+            const query = searchInput.value.trim();
+            searchTimeout = setTimeout(() => {
+                if (query.length > 0) {
+                    dataState.searchQuery = query; dataState.searchPage = 1; dataState.hasMoreSearch = true;
+                    resultsContainer.innerHTML = ''; searchTitle.innerHTML = `Resultados: <span class="text-blue-400">"${query}"</span>`;
+                    performSearch();
+                } else {
+                    dataState.searchQuery = ''; loadExploreGrid();
+                }
+            }, 600);
+        }
+
+        async function loadExploreGrid() {
+            dataState.isSearching = true; dataState.searchPage = 1;
+            resultsContainer.innerHTML = ''; document.getElementById('search-loading').classList.remove('hidden');
+
+            let endpoint = '', params = '', titleStr = '';
+            switch(dataState.searchType) {
+                case 'movie': endpoint = '/movie/now_playing'; titleStr = 'Filmes Populares'; break;
+                case 'tv': endpoint = '/tv/popular'; titleStr = 'Séries em Alta'; break;
+                case 'dorama': endpoint = '/discover/tv'; params = '&with_original_language=ko'; titleStr = 'Doramas em Destaque'; break;
+                case 'soap': endpoint = '/discover/tv'; params = '&with_genres=10766'; titleStr = 'Novelas'; break;
+                case 'reality': endpoint = '/discover/tv'; params = '&with_genres=10764'; titleStr = 'Reality Shows'; break;
+                default: endpoint = '/trending/all/week'; titleStr = 'Em Alta na Semana'; break;
+            }
+
+            searchTitle.textContent = titleStr;
+            dataState.exploreEndpoint = endpoint; dataState.exploreParams = params;
+            const data = await fetchTMDB(endpoint, params + `&page=${dataState.searchPage}`);
+            
+            document.getElementById('search-loading').classList.add('hidden');
+            dataState.isSearching = false;
+
+            if (data.results?.length > 0) { renderGridItems(data.results); dataState.searchPage++; dataState.hasMoreSearch = data.total_pages > 1; } 
+            else dataState.hasMoreSearch = false;
+        }
+
+        async function performSearch() {
+            if (dataState.isSearching || !dataState.hasMoreSearch) return;
+            dataState.isSearching = true; document.getElementById('search-loading').classList.remove('hidden');
+
+            let searchApiType = 'multi';
+            if (['tv', 'dorama', 'soap', 'reality'].includes(dataState.searchType)) searchApiType = 'tv';
+            else if (dataState.searchType === 'movie') searchApiType = 'movie';
+
+            dataState.exploreEndpoint = `/search/${searchApiType}`;
+            dataState.exploreParams = `&query=${encodeURIComponent(dataState.searchQuery)}`;
+            const data = await fetchTMDB(dataState.exploreEndpoint, dataState.exploreParams + `&page=${dataState.searchPage}`);
+            
+            if (data.results?.length > 0) { renderGridItems(data.results); dataState.searchPage++; if (dataState.searchPage > data.total_pages) dataState.hasMoreSearch = false; } 
+            else if (dataState.searchPage === 1) {
+                resultsContainer.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-16 text-gray-500"><i class="ph ph-mask-sad text-5xl mb-3 opacity-50"></i><p class="text-sm md:text-lg text-center">Nenhum resultado encontrado.</p></div>`;
+                dataState.hasMoreSearch = false;
+            }
+            dataState.isSearching = false; document.getElementById('search-loading').classList.add('hidden');
+        }
+
+        async function loadMoreGridItems() {
+            if (dataState.isSearching || !dataState.hasMoreSearch) return;
+            dataState.isSearching = true; document.getElementById('search-loading').classList.remove('hidden');
+            const data = await fetchTMDB(dataState.exploreEndpoint, dataState.exploreParams + `&page=${dataState.searchPage}`);
+            document.getElementById('search-loading').classList.add('hidden');
+            dataState.isSearching = false;
+            if (data.results?.length > 0) { renderGridItems(data.results); dataState.searchPage++; if (dataState.searchPage > data.total_pages) dataState.hasMoreSearch = false; } 
+            else dataState.hasMoreSearch = false;
+        }
+
+        function renderGridItems(items) {
+            const validItems = items.filter(i => (i.media_type === 'movie' || i.media_type === 'tv' || !i.media_type) && i.poster_path);
+            validItems.forEach(item => {
+                let mType = item.media_type; 
+                if(!mType) mType = ['dorama', 'soap', 'reality'].includes(dataState.searchType) ? 'tv' : (dataState.searchType === 'multi' ? (item.title ? 'movie' : 'tv') : dataState.searchType);
+                const typeLabel = mType === 'movie' ? 'FILME' : 'SÉRIE';
+                
+                const card = document.createElement('div');
+                card.className = "poster-card w-full cursor-pointer relative group rounded-xl overflow-hidden bg-gray-900 border border-gray-800 animate-pop shadow-sm";
+                card.onclick = () => handleOpenDetails(item.id, mType);
+                card.innerHTML = `
+                    <img src="${IMG_URL}${item.poster_path}" alt="Poster" class="w-full h-auto object-cover aspect-[2/3] transform group-hover:scale-110 transition-transform duration-500" loading="lazy">
+                    <div class="absolute top-1.5 right-1.5 md:top-2 md:right-2 bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded text-[8px] md:text-[10px] font-bold text-blue-400 border border-blue-900/50 uppercase">${typeLabel}</div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2 md:p-3">
+                        <i class="ph-fill ph-play-circle text-2xl md:text-4xl text-blue-500 self-center mb-auto mt-auto drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]"></i>
+                        <span class="text-white text-[10px] md:text-sm font-bold line-clamp-2 md:truncate leading-tight">${item.title || item.name}</span>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        window.addEventListener('scroll', () => { if (appState.tab === 'search') { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) loadMoreGridItems(); } });
+
+        // --- MODAL DETALHES ---
+        async function handleOpenDetails(id, mediaType) {
+            dataState.currentMediaId = id; dataState.currentMediaType = mediaType; dataState.currentSeason = 1;
+            document.getElementById('modal-actions').innerHTML = '<div class="flex justify-center p-6"><i class="ph ph-circle-notch animate-spin text-3xl text-blue-500"></i></div>';
+            navigate({ tab: appState.tab, modalOpen: true, playerOpen: false, playerUrl: '', playerTitle: '' });
+
+            // Fetch Real-time Anti-cache
+            const details = await fetchTMDB(`/${mediaType}/${id}`);
+            
+            document.getElementById('modal-bg').style.backgroundImage = `url(${BG_URL}${details.backdrop_path || details.poster_path})`;
+            document.getElementById('modal-poster').src = `${IMG_URL}${details.poster_path}`;
+            document.getElementById('modal-title').textContent = details.title || details.name;
+            document.getElementById('modal-year').textContent = (details.release_date || details.first_air_date || 'N/A').split('-')[0];
+            document.getElementById('modal-type').textContent = mediaType === 'movie' ? 'Filme' : 'Série';
+            document.getElementById('modal-rating').innerHTML = `<i class="ph-fill ph-star"></i> ${(details.vote_average || 0).toFixed(1)}`;
+            document.getElementById('modal-overview').textContent = details.overview || 'Sinopse não disponível.';
+
+            const actionsContainer = document.getElementById('modal-actions');
+            if (mediaType === 'movie') {
+                actionsContainer.innerHTML = `<button onclick="handlePlayMovie(${id})" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 md:py-4 px-6 rounded-xl flex justify-center items-center gap-3 transition-all transform hover:scale-[1.02] shadow-[0_0_20px_rgba(37,99,235,0.4)] text-sm md:text-lg"><i class="ph-fill ph-play-circle text-2xl md:text-3xl"></i><span>Reproduzir Filme</span></button>`;
+            } else buildSeriesSelector(details);
+        }
+
+        function showModalVisuals() {
+            const modal = document.getElementById('details-modal'), content = document.getElementById('modal-content');
+            modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95', 'opacity-0'); content.classList.add('animate-modal'); modal.scrollTop = 0; }, 10);
+            clearInterval(dataState.bannerInterval);
+        }
+
+        function hideModalVisuals() {
+            const modal = document.getElementById('details-modal'), content = document.getElementById('modal-content');
+            modal.classList.add('opacity-0'); content.classList.remove('animate-modal'); content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); if(!appState.playerOpen) document.body.style.overflow = ''; }, 150);
+            if(appState.tab === 'home' && !appState.playerOpen) startBannerInterval();
+        }
+
+        async function buildSeriesSelector(showDetails) {
+            const actionsContainer = document.getElementById('modal-actions');
+            const seasons = showDetails.seasons.filter(s => s.season_number > 0);
+            if (seasons.length === 0) { actionsContainer.innerHTML = '<p class="text-gray-400 text-center text-sm">Nenhum episódio.</p>'; return; }
+
+            actionsContainer.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4 pb-4 border-b border-gray-800">
+                    <h4 class="text-white font-bold text-sm md:text-lg flex items-center gap-2"><i class="ph ph-list-numbers text-blue-400 text-xl"></i> Episódios</h4>
+                    <div class="relative w-full sm:w-48">
+                        <select id="season-select" onchange="loadEpisodes(this.value)" class="w-full appearance-none bg-black border border-gray-700 text-white py-2 px-4 pr-8 rounded-lg outline-none focus:border-blue-500 text-sm font-medium cursor-pointer shadow-inner">
+                            ${seasons.map(s => `<option value="${s.season_number}">Temporada ${s.season_number}</option>`).join('')}
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div id="episodes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[35vh] md:max-h-[400px] overflow-y-auto pr-2 scroll-smooth-ios"></div>
+            `;
+            loadEpisodes(seasons[0].season_number); // A série atualiza episódios em tempo real
+        }
+
+        async function loadEpisodes(seasonNumber) {
+            dataState.currentSeason = seasonNumber;
+            const epsContainer = document.getElementById('episodes-list');
+            epsContainer.innerHTML = '<div class="col-span-full flex justify-center py-4"><i class="ph ph-circle-notch animate-spin text-2xl text-blue-500"></i></div>';
+            
+            const data = await fetchTMDB(`/tv/${dataState.currentMediaId}/season/${seasonNumber}`);
+            if (data.episodes?.length > 0) {
+                epsContainer.innerHTML = data.episodes.map(ep => `
+                    <button onclick="handlePlayEpisode(${ep.episode_number})" class="flex flex-col text-left bg-black hover:bg-blue-900/20 border border-gray-800 hover:border-blue-500/50 rounded-xl p-3 transition-all group relative overflow-hidden">
+                        <div class="flex justify-between items-start w-full mb-1 z-10">
+                            <span class="font-black text-gray-300 group-hover:text-blue-400 text-sm md:text-base">T${seasonNumber}:E${ep.episode_number}</span>
+                            <div class="w-7 h-7 rounded-full bg-gray-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors shadow-lg"><i class="ph-fill ph-play text-white text-xs"></i></div>
+                        </div>
+                        <span class="text-xs text-gray-400 group-hover:text-gray-200 line-clamp-2 z-10 pr-2">${ep.name || `Episódio ${ep.episode_number}`}</span>
+                    </button>
+                `).join('');
+            } else epsContainer.innerHTML = '<p class="text-gray-500 text-center text-sm col-span-full py-4">Nenhum episódio cadastrado.</p>';
+        }
+
+        // --- PLAYER ---
+        function handlePlayMovie(tmdbId) { navigate({ tab: appState.tab, modalOpen: false, playerOpen: true, playerUrl: `https://redeflixapi.store/filme/${tmdbId}` }); }
+        function handlePlayEpisode(episodeNumber) { navigate({ tab: appState.tab, modalOpen: false, playerOpen: true, playerUrl: `https://redeflixapi.store/serie/${dataState.currentMediaId}/${dataState.currentSeason}/${episodeNumber}` }); }
+
+        function showPlayerVisuals(iframeUrl) {
+            const overlay = document.getElementById('player-overlay'), header = document.getElementById('player-header'), iframe = document.getElementById('video-iframe');
+            clearInterval(dataState.bannerInterval); document.body.style.overflow = 'hidden';
+            if(iframe.src !== iframeUrl) iframe.src = iframeUrl;
+            overlay.classList.remove('hidden'); setTimeout(() => { overlay.classList.remove('opacity-0'); header.classList.remove('-translate-y-full'); }, 10);
+        }
+
+        function hidePlayerVisuals() {
+            const overlay = document.getElementById('player-overlay'), header = document.getElementById('player-header'), iframe = document.getElementById('video-iframe');
+            overlay.classList.add('opacity-0'); header.classList.add('-translate-y-full');
+            setTimeout(() => { iframe.src = ''; overlay.classList.add('hidden'); if(!appState.modalOpen) document.body.style.overflow = ''; }, 150);
+            if(appState.tab === 'home' && !appState.modalOpen) startBannerInterval();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
